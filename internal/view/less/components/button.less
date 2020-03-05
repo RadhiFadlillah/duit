@@ -1,0 +1,101 @@
+// out: ../../css/components/
+
+.button {
+	display         : flex;
+	flex-flow       : row nowrap;
+	min-width       : 0;
+	min-height      : 2rem;
+	line-height     : 2rem;
+	font-size       : 0.9rem;
+	padding         : 0 0.5rem;
+	text-align      : start;
+	color           : var(--link-color);
+	cursor          : pointer;
+	border          : 1px solid transparent;
+	border-width    : 1px 4px;
+	background-color: var(--content-bg);
+	align-items     : center;
+	justify-content : center;
+	outline         : none;
+
+	&:hover,
+	&:focus {
+		color: var(--main-dark);
+	}
+}
+
+.button__text {
+	display      : block;
+	white-space  : nowrap;
+	overflow     : hidden;
+	text-overflow: ellipsis;
+	flex         : 1 0;
+	outline      : none;
+
+	&:not(:first-child) {
+		margin-left: 0.5rem;
+	}
+}
+
+.button--disabled {
+	color         : var(--disabled-color);
+	cursor        : default;
+	pointer-events: none;
+}
+
+.button--alerted {
+	position: relative;
+
+	&::before {
+		display    : block;
+		content    : "\f06a";
+		position   : absolute;
+		top        : 0;
+		left       : 0;
+		font-family: "Font Awesome 5 Free";
+		font-weight: 900;
+		font-size  : 0.8rem;
+		line-height: 1rem;
+		width      : 1rem;
+		color      : var(--alert-color);
+		text-align : center;
+	}
+}
+
+.button--loading {
+	cursor        : default;
+	pointer-events: none;
+	position      : relative;
+	color         : var(--content-bg) !important;
+
+	&::before {
+		display: none;
+	}
+
+	&::after {
+		display    : block;
+		line-height: 2rem;
+		width      : 2rem;
+		color      : var(--link-color);
+		font-family: "Font Awesome 5 Free";
+		font-weight: 900;
+		text-align : center;
+		content    : "\f2f1";
+		position   : absolute;
+		top        : 50%;
+		left       : 50%;
+		margin-top : -1rem;
+		margin-left: -1rem;
+		animation  : spinning 1s linear infinite;
+	}
+}
+
+@keyframes spinning {
+	from {
+		transform: rotate(0deg);
+	}
+
+	to {
+		transform: rotate(360deg);
+	}
+}

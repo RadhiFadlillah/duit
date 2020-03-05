@@ -5,7 +5,7 @@
 	<title>Duit - Money Tracker</title>
 
 	<meta charset="UTF-8">
-	<meta name="description" content="POS System for Yulia Group">
+	<meta name="description" content="Duit, simple money tracker">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 	<link rel="apple-touch-icon-precomposed" sizes="120x120" href="/res/favicons/apple-120x120.png">
@@ -17,7 +17,11 @@
 </head>
 
 <body>
-
+	<script src="/js/libs/mithril.min.js"></script>
+	<script type="module">
+		import { startApp } from "./js/index.min.js"
+		startApp()
+	</script>
 </body>
 
 </html>

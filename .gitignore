@@ -1,5 +1,6 @@
 # Exclude config
 .vscode/tasks.json
+config.toml
 
 # Exclude executable
 duit
