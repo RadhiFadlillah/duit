@@ -1,0 +1,5 @@
+# Exclude config
+.vscode/tasks.json
+
+# Exclude executable
+duit

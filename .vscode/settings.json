@@ -1,0 +1,29 @@
+{
+	// MinifyAll
+	"MinifyAll.disableHtml": true,
+	"MinifyAll.disableJson": true,
+	"MinifyAll.disableJsonc": true,
+	"MinifyAll.disableCss": true,
+	"MinifyAll.disableLess": true,
+	"MinifyAll.PrefixOfNewMinifiedFiles": ".min",
+	"MinifyAll.disableMessages": true,
+	"MinifyAll.disableStatusbarInformation": true,
+	"MinifyAll.minifyOnSaveToNewFile": true,
+	"MinifyAll.openMinifiedDocument": false,
+	// LESS
+	"less.compile": {
+		"compress": true,
+		"sourceMap": false,
+		"out": false,
+		"autoprefixer": [
+			"last 2 versions",
+			"> 8%"
+		]
+	},
+	// File explorer
+	"files.exclude": {
+		"**/.git": true,
+		"**/view/**/*.min.js": true,
+		"**/view/css": false
+	}
+}
