@@ -33,10 +33,10 @@ function loginScreen() {
 		request("/api/login", "5s", options)
 			.then(json => {
 				let session = json.session,
-					account = json.account || null
+					user = json.user || null
 
 				Cookies.set("session-server", session)
-				localStorage.setItem("account", JSON.stringify(account))
+				localStorage.setItem("user", JSON.stringify(user))
 				window.location.href = "/"
 			})
 			.catch(err => {

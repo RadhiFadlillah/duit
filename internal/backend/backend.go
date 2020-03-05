@@ -78,15 +78,15 @@ func ServeApp(db *sqlx.DB, port int) error {
 	return svr.ListenAndServe()
 }
 
-func authenticationRules(account model.Account, method, url string) bool {
-	// If account doesn't have any ID, it means this is the first login when
-	// there are no accounts in database. Only allow him in index, login page
-	// and account management.
-	if account.ID == 0 {
+func authenticationRules(user model.User, method, url string) bool {
+	// If user doesn't have any ID, it means this is the first login when
+	// there are no users in database. Only allow him in index, login page
+	// and user management.
+	if user.ID == 0 {
 		switch url {
 		case "/",
 			"/login",
-			"/api/accounts":
+			"/api/users":
 			return true
 		default:
 			return false

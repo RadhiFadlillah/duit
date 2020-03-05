@@ -52,7 +52,7 @@ func Open(config model.Config) (db *sqlx.DB, err error) {
 	}()
 
 	// 	Generate tables
-	tx.MustExec(ddlCreateAccount)
+	tx.MustExec(ddlCreateUser)
 
 	// Commit transaction
 	err = tx.Commit()

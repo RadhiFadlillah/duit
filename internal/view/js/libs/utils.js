@@ -47,9 +47,9 @@ export function cloneObject(src) {
 	return JSON.parse(JSON.stringify(src))
 }
 
-export function getActiveAccount() {
-	let localAccount = localStorage.getItem("account") || "null"
-	return JSON.parse(localAccount)
+export function getActiveUser() {
+	let localUser = localStorage.getItem("user") || "null"
+	return JSON.parse(localUser)
 }
 
 export function searchTree(tree, value, parent) {

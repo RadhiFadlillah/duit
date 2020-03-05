@@ -13,11 +13,11 @@ import (
 type SessionManager struct {
 	sync.RWMutex
 
-	// Account session is map for account sessions and its expiration time.
+	// User session is map for user sessions and its expiration time.
 	// Special mention for username sesssion list, which is list of sessions
 	// that used by a username. Useful for mass logout.
-	accountSession      map[string]model.Account
-	accountSessionExp   map[string]time.Time
+	userSession         map[string]model.User
+	userSessionExp      map[string]time.Time
 	usernameSessionList map[string][]string
 
 	// List of duration that used by goroutines
@@ -28,8 +28,8 @@ type SessionManager struct {
 // NewSessionManager returnns new SessionManager.
 func NewSessionManager(defaultExpiration, cleanupInterval time.Duration) *SessionManager {
 	sm := &SessionManager{
-		accountSession:      make(map[string]model.Account),
-		accountSessionExp:   make(map[string]time.Time),
+		userSession:         make(map[string]model.User),
+		userSessionExp:      make(map[string]time.Time),
 		usernameSessionList: make(map[string][]string),
 
 		defaultExpiration: defaultExpiration,
@@ -41,8 +41,8 @@ func NewSessionManager(defaultExpiration, cleanupInterval time.Duration) *Sessio
 	return sm
 }
 
-// RegisterAccount register account and return its session
-func (sm *SessionManager) RegisterAccount(account model.Account, duration time.Duration) (string, error) {
+// RegisterUser register user and return its session
+func (sm *SessionManager) RegisterUser(user model.User, duration time.Duration) (string, error) {
 	// Set default active duration
 	if duration <= 0 {
 		duration = sm.defaultExpiration
@@ -58,34 +58,34 @@ func (sm *SessionManager) RegisterAccount(account model.Account, duration time.D
 	sm.Lock()
 	defer sm.Unlock()
 
-	sm.accountSession[session] = account
-	sm.accountSessionExp[session] = time.Now().Add(duration)
-	sm.usernameSessionList[account.Username] = append(sm.usernameSessionList[account.Username], session)
+	sm.userSession[session] = user
+	sm.userSessionExp[session] = time.Now().Add(duration)
+	sm.usernameSessionList[user.Username] = append(sm.usernameSessionList[user.Username], session)
 
 	return session, nil
 }
 
-// GetAccount get account based on specified session
-func (sm *SessionManager) GetAccount(session string) (model.Account, time.Time, bool) {
+// GetUser get user based on specified session
+func (sm *SessionManager) GetUser(session string) (model.User, time.Time, bool) {
 	sm.RLock()
 	defer sm.RUnlock()
 
-	account, ok1 := sm.accountSession[session]
-	expTime, ok2 := sm.accountSessionExp[session]
-	return account, expTime, ok1 && ok2
+	user, ok1 := sm.userSession[session]
+	expTime, ok2 := sm.userSessionExp[session]
+	return user, expTime, ok1 && ok2
 }
 
-// RemoveAccountSession removes the specified session from list of active account sessions.
-func (sm *SessionManager) RemoveAccountSession(session string) {
+// RemoveUserSession removes the specified session from list of active user sessions.
+func (sm *SessionManager) RemoveUserSession(session string) {
 	sm.Lock()
 	defer sm.Unlock()
 
-	delete(sm.accountSession, session)
-	delete(sm.accountSessionExp, session)
+	delete(sm.userSession, session)
+	delete(sm.userSessionExp, session)
 }
 
-// ProlongAccountSession extends the expiration time for specified session
-func (sm *SessionManager) ProlongAccountSession(session string, duration time.Duration) {
+// ProlongUserSession extends the expiration time for specified session
+func (sm *SessionManager) ProlongUserSession(session string, duration time.Duration) {
 	// Set default duration
 	if duration <= 0 {
 		duration = sm.defaultExpiration
@@ -94,9 +94,9 @@ func (sm *SessionManager) ProlongAccountSession(session string, duration time.Du
 	sm.Lock()
 	defer sm.Unlock()
 
-	if expTime, ok := sm.accountSessionExp[session]; ok {
+	if expTime, ok := sm.userSessionExp[session]; ok {
 		expTime = expTime.Add(duration)
-		sm.accountSessionExp[session] = expTime
+		sm.userSessionExp[session] = expTime
 	}
 }
 
@@ -107,8 +107,8 @@ func (sm *SessionManager) RemoveUsername(username string) {
 
 	if sessions, ok := sm.usernameSessionList[username]; ok {
 		for _, session := range sessions {
-			delete(sm.accountSession, session)
-			delete(sm.accountSessionExp, session)
+			delete(sm.userSession, session)
+			delete(sm.userSessionExp, session)
 		}
 
 		delete(sm.usernameSessionList, username)
@@ -131,10 +131,10 @@ func (sm *SessionManager) cleanUpExpiredSessions() {
 		sm.Lock()
 		currentTime := time.Now()
 
-		for session, expTime := range sm.accountSessionExp {
+		for session, expTime := range sm.userSessionExp {
 			if currentTime.After(expTime) {
-				delete(sm.accountSession, session)
-				delete(sm.accountSessionExp, session)
+				delete(sm.userSession, session)
+				delete(sm.userSessionExp, session)
 			}
 		}
 

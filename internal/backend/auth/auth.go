@@ -12,8 +12,8 @@ import (
 )
 
 // AuthenticationRules is function to check whether
-// an account allowed to access an URL.
-type AuthenticationRules func(account model.Account, method, url string) bool
+// an user allowed to access an URL.
+type AuthenticationRules func(user model.User, method, url string) bool
 
 // Authenticator is object to authenticate a http request.
 // It also handles login and logout.
@@ -26,8 +26,6 @@ type Authenticator struct {
 // NewAuthenticator returns new Authenticator
 func NewAuthenticator(db *sqlx.DB, rules AuthenticationRules) (*Authenticator, error) {
 	// Create authenticator
-	// accountCache used to map an account into sessions. An account can have several active sessions.
-	// sessionCache used to map a session into an account. One session only match to one account.
 	auth := new(Authenticator)
 	auth.db = db
 	auth.sessionManager = NewSessionManager(3*time.Hour, 10*time.Minute)
@@ -38,8 +36,8 @@ func NewAuthenticator(db *sqlx.DB, rules AuthenticationRules) (*Authenticator, e
 
 // Login verify that username and password match,
 // generate session ID then save it to cache.
-func (auth *Authenticator) Login(username, password string) (string, model.Account, error) {
-	emptyAccount := model.Account{}
+func (auth *Authenticator) Login(username, password string) (string, model.User, error) {
+	emptyUser := model.User{}
 
 	// Start transaction
 	// We only use it to fetch the data,
@@ -48,57 +46,57 @@ func (auth *Authenticator) Login(username, password string) (string, model.Accou
 	defer tx.Rollback()
 
 	// Prepare statements
-	stmtGetAccountCount, err := tx.Preparex(`
-		SELECT COUNT(id) FROM account`)
+	stmtGetUserCount, err := tx.Preparex(`
+		SELECT COUNT(id) FROM user`)
 	if err != nil {
-		return "", emptyAccount, fmt.Errorf("failed to prepare query: %w", err)
+		return "", emptyUser, fmt.Errorf("failed to prepare query: %w", err)
 	}
 
-	stmtGetAccount, err := tx.Preparex(`
+	stmtGetUser, err := tx.Preparex(`
 		SELECT id, username, name, password, permission
-		FROM account WHERE username = ?`)
+		FROM user WHERE username = ?`)
 	if err != nil {
-		return "", emptyAccount, fmt.Errorf("failed to prepare query: %w", err)
+		return "", emptyUser, fmt.Errorf("failed to prepare query: %w", err)
 	}
 
-	// Get count of account
-	var nAccount int
-	err = stmtGetAccountCount.Get(&nAccount)
+	// Get count of user
+	var nUser int
+	err = stmtGetUserCount.Get(&nUser)
 	if err != nil {
-		return "", emptyAccount, fmt.Errorf("failed to get account count: %w", err)
+		return "", emptyUser, fmt.Errorf("failed to get user count: %w", err)
 	}
 
-	// Get account from database
-	var account model.Account
-	if nAccount > 0 {
-		err = stmtGetAccount.Get(&account, username)
+	// Get user from database
+	var user model.User
+	if nUser > 0 {
+		err = stmtGetUser.Get(&user, username)
 		if err != nil && err != sql.ErrNoRows {
-			return "", emptyAccount, fmt.Errorf("failed to get account: %w", err)
+			return "", emptyUser, fmt.Errorf("failed to get user: %w", err)
 		}
 
-		if account.ID == 0 {
-			return "", emptyAccount, fmt.Errorf("account doesn't exist")
+		if err == sql.ErrNoRows {
+			return "", emptyUser, fmt.Errorf("user doesn't exist")
 		}
 
-		err = bcrypt.CompareHashAndPassword([]byte(account.Password), []byte(password))
+		err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password))
 		if err != nil {
-			return "", emptyAccount, fmt.Errorf("username and password don't match")
+			return "", emptyUser, fmt.Errorf("username and password don't match")
 		}
 	}
 
-	// Save account to session manager
+	// Save user to session manager
 	expTime := time.Duration(0)
-	if account.ID == 0 {
+	if user.ID == 0 {
 		expTime = 15 * time.Minute
 	}
 
-	session, err := auth.sessionManager.RegisterAccount(account, expTime)
+	session, err := auth.sessionManager.RegisterUser(user, expTime)
 	if err != nil {
-		return "", emptyAccount, fmt.Errorf("failed to register account: %w", err)
+		return "", emptyUser, fmt.Errorf("failed to register user: %w", err)
 	}
 
-	account.Password = ""
-	return session, account, nil
+	user.Password = ""
+	return session, user, nil
 }
 
 // Logout invalidates session
@@ -108,11 +106,11 @@ func (auth *Authenticator) Logout(r *http.Request) error {
 		return fmt.Errorf("session has been expired")
 	}
 
-	auth.sessionManager.RemoveAccountSession(session)
+	auth.sessionManager.RemoveUserSession(session)
 	return nil
 }
 
-// MassLogout invalidates all sessions for an account.
+// MassLogout invalidates all sessions for an user.
 func (auth *Authenticator) MassLogout(username string) {
 	auth.sessionManager.RemoveUsername(username)
 }
@@ -127,21 +125,21 @@ func (auth *Authenticator) AuthenticateUser(r *http.Request) error {
 	}
 
 	// Get data from session manager
-	account, expTime, found := auth.sessionManager.GetAccount(session)
+	user, expTime, found := auth.sessionManager.GetUser(session)
 	if !found {
 		return fmt.Errorf("session has been expired")
 	}
 
-	// Check whether this account has permission to access the URL
+	// Check whether this user has permission to access the URL
 	if auth.rules != nil {
-		if allowed := auth.rules(account, r.Method, r.URL.Path); !allowed {
-			return fmt.Errorf("account doesn't have permission to access")
+		if allowed := auth.rules(user, r.Method, r.URL.Path); !allowed {
+			return fmt.Errorf("user doesn't have permission to access")
 		}
 	}
 
 	// If session almost expired, prolong it
 	if expTime.Sub(time.Now()).Hours() < 1 {
-		auth.sessionManager.ProlongAccountSession(session, 0)
+		auth.sessionManager.ProlongUserSession(session, 0)
 	}
 
 	return nil

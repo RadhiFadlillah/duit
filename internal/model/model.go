@@ -12,8 +12,8 @@ type Config struct {
 	DbName     string
 }
 
-// Account is container for account's data
-type Account struct {
+// User is container for user's data
+type User struct {
 	ID         int64           `db:"id"          json:"id"`
 	Username   string          `db:"username"    json:"username"`
 	Name       string          `db:"name"        json:"name"`

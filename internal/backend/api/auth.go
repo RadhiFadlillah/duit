@@ -19,14 +19,14 @@ func (h *Handler) Login(w http.ResponseWriter, r *http.Request, ps httprouter.Pa
 	checkError(err)
 
 	// Login using the authenticator
-	session, account, err := h.auth.Login(request.Username, request.Password)
+	session, user, err := h.auth.Login(request.Username, request.Password)
 	checkError(err)
 
 	// Send login result
 	loginResult := map[string]interface{}{}
 	loginResult["session"] = session
-	if account.ID != 0 && account.Username != "" {
-		loginResult["account"] = account
+	if user.ID != 0 && user.Username != "" {
+		loginResult["user"] = user
 	}
 
 	w.Header().Add("Content-Encoding", "gzip")
