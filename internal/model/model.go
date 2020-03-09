@@ -26,9 +26,12 @@ type User struct {
 
 // Account is container for financial account
 type Account struct {
-	ID     int64           `db:"id"     json:"id"`
-	Name   string          `db:"name"   json:"name"`
-	Amount decimal.Decimal `db:"amount" json:"amount"`
+	ID            int64           `db:"id"            json:"id"`
+	Name          string          `db:"name"          json:"name"`
+	InitialAmount decimal.Decimal `db:"initialAmount" json:"initialAmount"`
+
+	// Additional info fields
+	Total decimal.Decimal `db:"total" json:"total"`
 }
 
 // Entry is container for book entries
@@ -40,5 +43,4 @@ type Entry struct {
 	Description       null.String     `db:"description"         json:"description"`
 	Amount            decimal.Decimal `db:"amount"              json:"amount"`
 	EntryDate         string          `db:"entry_date"          json:"entryDate"`
-	InputTime         string          `db:"input_time"          json:"inputTime"`
 }

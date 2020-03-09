@@ -23,7 +23,7 @@ type SlowDown struct {
 
 func (sd SlowDown) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if strings.HasPrefix(r.URL.Path, "/api") {
-		time.Sleep(500 * time.Millisecond)
+		time.Sleep(1000 * time.Millisecond)
 	}
 
 	sd.router.ServeHTTP(w, r)
@@ -59,6 +59,9 @@ func ServeApp(db *sqlx.DB, port int) error {
 	router.POST("/api/login", apiHdl.Login)
 	router.POST("/api/logout", apiHdl.Logout)
 
+	router.GET("/api/accounts", apiHdl.SelectAccounts)
+	router.GET("/api/account/:id", apiHdl.GetAccountEntries)
+
 	// Route for panic
 	router.PanicHandler = func(w http.ResponseWriter, r *http.Request, arg interface{}) {
 		http.Error(w, fmt.Sprint(arg), 500)
@@ -79,19 +82,5 @@ func ServeApp(db *sqlx.DB, port int) error {
 }
 
 func authenticationRules(user model.User, method, url string) bool {
-	// If user doesn't have any ID, it means this is the first login when
-	// there are no users in database. Only allow him in index, login page
-	// and user management.
-	if user.ID == 0 {
-		switch url {
-		case "/",
-			"/login",
-			"/api/users":
-			return true
-		default:
-			return false
-		}
-	}
-
 	return true
 }

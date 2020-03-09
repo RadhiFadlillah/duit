@@ -1,0 +1,32 @@
+// out: ../../css/components/
+
+.sidebar__button {
+	display     : block;
+	text-align  : center;
+	line-height : 2rem;
+	font-size   : 0.9rem;
+	color       : var(--link-color);
+	cursor      : pointer;
+	border      : 1px solid transparent;
+	border-width: 1px 4px;
+
+	&:hover,
+	&:focus {
+		color: var(--main-dark);
+	}
+}
+
+.sidebar__button--active {
+	background-color   : var(--app-bg);
+	border-top-color   : var(--border);
+	border-left-color  : var(--main);
+	border-right-color : var(--app-bg);
+	border-bottom-color: var(--border);
+	color              : var(--main-dark);
+	z-index            : 1;
+	pointer-events     : none;
+
+	.tooltip {
+		display: none !important;
+	}
+}

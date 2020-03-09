@@ -1,0 +1,173 @@
+// out: ../../css/components/
+
+.dialog__overlay {
+	display         : flex;
+	flex-flow       : column nowrap;
+	align-items     : center;
+	justify-content : center;
+	padding         : 16px;
+	background-color: rgba(0, 0, 0, 0.7);
+	position        : fixed;
+	top             : 0;
+	left            : 0;
+	right           : 0;
+	bottom          : 0;
+	z-index         : 9999;
+}
+
+.dialog {
+	display         : flex;
+	flex-flow       : column nowrap;
+	width           : 100%;
+	max-width       : 400px;
+	max-height      : 100%;
+	background-color: var(--content-bg);
+}
+
+.dialog__header {
+	display         : block;
+	padding         : 0.5rem;
+	flex-shrink     : 0;
+	font-weight     : 600;
+	text-align      : center;
+	white-space     : nowrap;
+	text-overflow   : ellipsis;
+	overflow        : hidden;
+	text-transform  : uppercase;
+	color           : var(--main-font);
+	background-color: var(--main);
+	border-bottom   : 1px solid var(--main-dark);
+}
+
+.dialog__body {
+	overflow-y: auto;
+	overflow-x: hidden;
+}
+
+.dialog__footer {
+	display   : flex;
+	flex-flow : row wrap;
+	border-top: 1px solid var(--border);
+	padding   : 0.2rem 0;
+}
+
+// Default message
+
+.dialog__message {
+	display    : block;
+	padding    : 1rem;
+	font-size  : 0.9rem;
+	color      : var(--color);
+	line-height: 1.2;
+	min-height : 80px;
+}
+
+// Form elements
+
+.dialog__form {
+	display              : grid;
+	grid-template-columns: auto minmax(0, 1fr);
+	grid-gap             : 0.5rem;
+	padding              : 8px;
+	align-items          : center;
+}
+
+.dialog__form__message {
+	grid-column-start: 1;
+	grid-column-end  : -1;
+	font-size        : 0.9rem;
+	color            : var(--color);
+	line-height      : 1.2;
+}
+
+.dialog__form__label {
+	margin-top: 0.5rem;
+	align-self: start;
+	font-size : 0.9rem;
+	color     : var(--color);
+
+	&::after {
+		content     : ":";
+		padding-left: 0.5rem;
+	}
+}
+
+.dialog__input[type=text],
+.dialog__input[type=number],
+.dialog__form__input[type=text],
+.dialog__form__input[type=password],
+.dialog__form__input[type=date],
+.dialog__form__input[type=number] {
+	min-width: 0;
+	max-width: 100%;
+	width    : 100%;
+	font-size: 0.9rem;
+	padding  : 0.5rem;
+	color    : var(--color);
+	border   : 1px solid var(--border);
+
+	&::selection {
+		color           : var(--main-font);
+		background-color: var(--main);
+	}
+
+	&[disabled] {
+		background-color: var(--app-bg);
+	}
+}
+
+.dialog__form__select {
+	align-self: stretch;
+	border    : 1px solid var(--border);
+}
+
+.dialog__form__select__option {
+	padding  : 0.5rem;
+	font-size: 0.9rem;
+	color    : var(--color);
+}
+
+.dialog__form__textarea {
+	min-width : 0;
+	max-width : 100%;
+	width     : 100%;
+	min-height: 3rem;
+	max-height: 10rem;
+	font-size : 0.9rem;
+	padding   : 0.5rem;
+	color     : var(--color);
+	border    : 1px solid var(--border);
+	resize    : vertical;
+}
+
+.dialog__form__check {
+	display     : flex;
+	flex-flow   : row nowrap;
+	align-items : center;
+	justify-self: center;
+
+	&:hover,
+	&:focus {
+		color: var(--main-dark);
+	}
+
+	.dialog__form__check__caption {
+		font-size: 0.9rem;
+		color    : var(--color);
+		padding  : 0 0.5rem;
+		cursor   : pointer;
+	}
+}
+
+
+.dialog__form__field--nolabel {
+	grid-column-start: 1;
+	grid-column-end  : -1;
+}
+
+// Footer buttons
+
+.dialog__button {
+	text-transform: uppercase;
+	font-weight   : 600;
+}

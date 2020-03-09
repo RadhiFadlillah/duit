@@ -14,9 +14,9 @@ CREATE TABLE IF NOT EXISTS user (
 
 const ddlCreateAccount = `
 CREATE TABLE IF NOT EXISTS account (
-	id          INT UNSIGNED  NOT NULL AUTO_INCREMENT,
-	name        VARCHAR(100)  NOT NULL,
-	amount      DECIMAL(20,4) NOT NULL,
+	id             INT UNSIGNED  NOT NULL AUTO_INCREMENT,
+	name           VARCHAR(100)  NOT NULL,
+	initial_amount DECIMAL(20,4) NOT NULL,
 	PRIMARY KEY (id))
 	CHARACTER SET utf8mb4
 `
@@ -30,7 +30,6 @@ CREATE TABLE IF NOT EXISTS entry (
 	description         VARCHAR(150)  DEFAULT NULL,
 	amount              DECIMAL(20,4) NOT NULL,
 	entry_date          DATE          NOT NULL,
-	input_time          TIMESTAMP     NOT NULL DEFAULT CURRENT_TIMESTAMP,
 	PRIMARY KEY (id),
 	FOREIGN KEY entry_account_id_FK (account_id) REFERENCES account (id)
 		ON UPDATE CASCADE ON DELETE CASCADE,

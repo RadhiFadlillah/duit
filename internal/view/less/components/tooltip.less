@@ -1,0 +1,74 @@
+// out: ../../css/components/
+
+.tooltip {
+	display         : block;
+	position        : fixed;
+	color           : var(--tooltip-color);
+	background-color: var(--tooltip-bg);
+	font-size       : 0.9rem;
+	line-height     : 2rem;
+	padding         : 0 8px;
+	z-index         : 9999;
+	border-radius   : 8px;
+	pointer-events  : none;
+	white-space     : nowrap;
+
+	&::before {
+		content         : "";
+		display         : none;
+		width           : 0.8rem;
+		height          : 0.8rem;
+		background-color: var(--tooltip-bg);
+		transform       : rotate(45deg);
+		position        : absolute;
+		z-index         : -1;
+	}
+}
+
+.tooltip--bottom {
+	margin-top: 0.8rem;
+
+	&::before {
+		display    : block;
+		top        : 0;
+		left       : 50%;
+		margin-left: -0.4rem;
+		margin-top : calc(-0.4rem + 2px);
+	}
+}
+
+.tooltip--right {
+	margin-left: 0.8rem;
+
+	&::before {
+		display    : block;
+		top        : 50%;
+		left       : 0;
+		margin-top : -0.4rem;
+		margin-left: calc(-0.4rem + 2px);
+	}
+}
+
+.tooltip--left {
+	margin-left: -0.8rem;
+
+	&::before {
+		display     : block;
+		top         : 50%;
+		right       : 0;
+		margin-top  : -0.4rem;
+		margin-right: calc(-0.4rem + 2px);
+	}
+}
+
+.tooltip--top {
+	margin-top: -0.8rem;
+
+	&::before {
+		display      : block;
+		left         : 50%;
+		bottom       : 0;
+		margin-left  : -0.4rem;
+		margin-bottom: calc(-0.4rem + 2px);
+	}
+}

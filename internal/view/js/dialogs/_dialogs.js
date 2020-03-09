@@ -1,0 +1,1 @@
+export { DialogError } from "./error.min.js"

@@ -1,13 +1,10 @@
-function homeScreen() {
-	function renderView() {
-		return m(".home", "Hello")
-	}
-
-	return {
-		view: renderView,
-	}
-}
+import {
+	Root,
+} from "./pages/_pages.min.js";
 
 export function startApp() {
-	m.mount(document.body, homeScreen)
-} 
+	m.route(document.body, "/", {
+		"/": Root,
+		"/:subpage": Root,
+	})
+}

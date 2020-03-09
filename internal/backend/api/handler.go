@@ -5,8 +5,6 @@ import (
 	"github.com/jmoiron/sqlx"
 )
 
-const paginationLength = 500
-
 // Handler represents handler for every API routes.
 type Handler struct {
 	db   *sqlx.DB
