@@ -5,6 +5,8 @@ import {
 
 import {
 	DialogError,
+	DialogConfirm,
+	DialogFormAccount,
 } from "../dialogs/_dialogs.min.js"
 
 import {
@@ -18,6 +20,7 @@ import {
 
 export function Home() {
 	let state = {
+		loading: false,
 		accountsLoading: false,
 		entriesLoading: false,
 
@@ -26,6 +29,7 @@ export function Home() {
 			id: 0,
 			name: "",
 			total: "0",
+			initialAmount: "0",
 			entries: []
 		},
 		pagination: {
@@ -34,6 +38,9 @@ export function Home() {
 		},
 
 		dlgError: { message: "", visible: false },
+		dlgNewAccount: { visible: false, loading: false },
+		dlgEditAccount: { visible: false, loading: false },
+		dlgDeleteAccount: { visible: false, loading: false },
 	}
 
 	// Local function
@@ -72,6 +79,7 @@ export function Home() {
 	let timeoutDuration = "5s"
 
 	function loadAccounts() {
+		state.loading = true
 		state.accountsLoading = true
 		m.redraw()
 
@@ -84,12 +92,14 @@ export function Home() {
 				state.dlgError.visible = true
 			})
 			.finally(() => {
+				state.loading = false
 				state.accountsLoading = false
 				m.redraw()
 			})
 	}
 
 	function loadEntries() {
+		state.loading = true
 		state.entriesLoading = true
 		m.redraw()
 
@@ -107,7 +117,108 @@ export function Home() {
 				state.dlgError.visible = true
 			})
 			.finally(() => {
+				state.loading = false
 				state.entriesLoading = false
+				m.redraw()
+			})
+	}
+
+	function saveNewAccount(data) {
+		state.loading = true
+		state.dlgNewAccount.loading = true
+		m.redraw()
+
+		let options = {
+			method: "POST",
+			body: JSON.stringify(data)
+		}
+
+		request("/api/account", timeoutDuration, options)
+			.then(account => {
+				state.accounts.push(account)
+				state.accounts.sort((a, b) => {
+					let nameA = a.name.toLowerCase(),
+						nameB = b.name.toLowerCase()
+
+					if (nameA < nameB) return -1
+					if (nameA > nameB) return 1
+					return 0
+				})
+			})
+			.catch(err => {
+				state.dlgError.message = err.message
+				state.dlgError.visible = true
+			})
+			.finally(() => {
+				state.loading = false
+				state.dlgNewAccount.loading = false
+				state.dlgNewAccount.visible = false
+				m.redraw()
+			})
+	}
+
+	function updateAccount(data) {
+		state.loading = true
+		state.dlgEditAccount.loading = true
+		m.redraw()
+
+		let options = {
+			method: "PUT",
+			body: JSON.stringify({
+				id: state.activeAccount.id,
+				name: data.name,
+				initialAmount: data.initialAmount
+			})
+		}
+
+		request("/api/account", timeoutDuration, options)
+			.then(json => {
+				let idx = state.accounts.findIndex(account => account.id === json.id),
+					newAccount = json
+
+				// Replace data
+				state.accounts.splice(idx, 1, newAccount)
+				state.activeAccount.name = newAccount.name
+				state.activeAccount.total = newAccount.total
+				state.activeAccount.initialAmount = newAccount.initialAmount
+			})
+			.catch(err => {
+				state.dlgError.message = err.message
+				state.dlgError.visible = true
+			})
+			.finally(() => {
+				state.loading = false
+				state.dlgEditAccount.loading = false
+				state.dlgEditAccount.visible = false
+				m.redraw()
+			})
+	}
+
+	function deleteAccount() {
+		state.loading = true
+		state.dlgDeleteAccount.loading = true
+		m.redraw()
+
+		let url = `/api/account/${state.activeAccount.id}`,
+			options = { method: "DELETE", }
+
+		request(url, timeoutDuration, options)
+			.then(() => {
+				let deletedIdx = state.accounts.findIndex(account => {
+					return account.id === state.activeAccount.id
+				})
+
+				state.accounts.splice(deletedIdx, 1)
+				state.activeAccount.id = 0
+			})
+			.catch(err => {
+				state.dlgError.message = err.message
+				state.dlgError.visible = true
+			})
+			.finally(() => {
+				state.loading = false
+				state.dlgDeleteAccount.loading = false
+				state.dlgDeleteAccount.visible = false
 				m.redraw()
 			})
 	}
@@ -124,10 +235,46 @@ export function Home() {
 			}))
 		}
 
+		if (dialogs.length === 0 && state.dlgNewAccount.visible) {
+			dialogs.push(m(DialogFormAccount, {
+				title: "Akun Baru",
+				loading: state.dlgNewAccount.loading,
+				onAccepted(data) { saveNewAccount(data) },
+				onRejected() { state.dlgNewAccount.visible = false }
+			}))
+		}
+
+		if (dialogs.length === 0 && state.dlgEditAccount.visible) {
+			let defaultValue = {
+				name: state.activeAccount.name,
+				initialAmount: state.activeAccount.initialAmount,
+			}
+
+			dialogs.push(m(DialogFormAccount, {
+				title: "Edit Akun",
+				loading: state.dlgEditAccount.loading,
+				defaultValue: defaultValue,
+				onAccepted(data) { updateAccount(data) },
+				onRejected() { state.dlgEditAccount.visible = false }
+			}))
+		}
+
+		if (dialogs.length === 0 && state.dlgDeleteAccount.visible) {
+			dialogs.push(m(DialogConfirm, {
+				title: "Delete Akun",
+				message: `Yakin ingin menghapus akun "${state.activeAccount.name}" ?`,
+				acceptText: "Ya",
+				rejectText: "Tidak",
+				loading: state.dlgDeleteAccount.loading,
+				onAccepted() { deleteAccount() },
+				onRejected() { state.dlgDeleteAccount.visible = false }
+			}))
+		}
+
 		// Prepare loading cover
 		let covers = []
 
-		if (state.accountsLoading || state.entriesLoading) {
+		if (state.loading) {
 			covers.push(m(LoadingCover))
 		}
 
@@ -154,10 +301,8 @@ export function Home() {
 			accountListNodes = state.accounts.map(account => {
 				let attrs = {}
 				if (account.id !== state.activeAccount.id) attrs.onclick = () => {
-					state.activeAccount.id = account.id
-					state.activeAccount.name = account.name
-					state.activeAccount.total = account.total
-					loadEntries(account.id)
+					state.activeAccount = account
+					loadEntries()
 				}
 
 				return m(".account", attrs,
@@ -175,6 +320,7 @@ export function Home() {
 					class: "home-list__header__button",
 					icon: "fa-plus-circle",
 					caption: "Akun baru",
+					onclick() { state.dlgNewAccount.visible = true }
 				}),
 			),
 			...accountListNodes,
@@ -297,12 +443,14 @@ export function Home() {
 						class: "home-list__header__button",
 						icon: "fa-pen",
 						caption: "Edit akun",
+						onclick() { state.dlgEditAccount.visible = true }
 					}),
 					m(Button, {
 						iconOnly: true,
 						class: "home-list__header__button",
 						icon: "fa-trash-alt",
 						caption: "Delete akun",
+						onclick() { state.dlgDeleteAccount.visible = true }
 					}),
 					m(Button, {
 						iconOnly: true,

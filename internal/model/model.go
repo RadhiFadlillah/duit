@@ -26,9 +26,9 @@ type User struct {
 
 // Account is container for financial account
 type Account struct {
-	ID            int64           `db:"id"            json:"id"`
-	Name          string          `db:"name"          json:"name"`
-	InitialAmount decimal.Decimal `db:"initialAmount" json:"initialAmount"`
+	ID            int64           `db:"id"             json:"id"`
+	Name          string          `db:"name"           json:"name"`
+	InitialAmount decimal.Decimal `db:"initial_amount" json:"initialAmount"`
 
 	// Additional info fields
 	Total decimal.Decimal `db:"total" json:"total"`
