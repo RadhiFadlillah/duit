@@ -148,9 +148,13 @@ export function DialogForm() {
 						}, choiceCaption)
 					})
 
+					let optionSize = optionNodes.length
+					if (optionSize >= 4) optionSize = 4
+					if (optionSize <= 1) optionSize = 2
+
 					inputNode = m("select.dialog__form__select", {
 						class: inputClass,
-						size: Math.min(optionNodes.length, 4),
+						size: optionSize,
 						oninput(e) { formData[name] = e.target.value }
 					}, optionNodes)
 					break
@@ -278,6 +282,7 @@ export function DialogForm() {
 		// Focus to first input
 		let input = vnode.dom.querySelector(".dialog__form>input")
 		if (input == null) input = vnode.dom.querySelector(".dialog__form>textarea")
+		if (input == null) input = vnode.dom.querySelector(".dialog__form>select")
 		if (input) input.focus()
 	}
 

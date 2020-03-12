@@ -65,6 +65,8 @@ func ServeApp(db *sqlx.DB, port int) error {
 	router.PUT("/api/account", apiHdl.UpdateAccount)
 	router.DELETE("/api/account/:id", apiHdl.DeleteAccount)
 
+	router.POST("/api/entry", apiHdl.InsertEntry)
+
 	// Route for panic
 	router.PanicHandler = func(w http.ResponseWriter, r *http.Request, arg interface{}) {
 		http.Error(w, fmt.Sprint(arg), 500)

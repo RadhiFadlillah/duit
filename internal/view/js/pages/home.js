@@ -7,6 +7,8 @@ import {
 	DialogError,
 	DialogConfirm,
 	DialogFormAccount,
+	DialogFormEntry,
+	DialogListAccount,
 } from "../dialogs/_dialogs.min.js"
 
 import {
@@ -41,6 +43,8 @@ export function Home() {
 		dlgNewAccount: { visible: false, loading: false },
 		dlgEditAccount: { visible: false, loading: false },
 		dlgDeleteAccount: { visible: false, loading: false },
+		dlgNewEntry: { visible: false, loading: false },
+		dlgTransferEntry: { visible: false, loading: false, entry: null },
 	}
 
 	// Local function
@@ -50,14 +54,21 @@ export function Home() {
 		})
 	}
 
+	function getDateParts(str) {
+		let parts = str.split("-")
+
+		return {
+			year: parseInt(parts[0], 10) || 1,
+			month: parseInt(parts[1], 10) || 1,
+			day: parseInt(parts[2], 10) || 1,
+		}
+	}
+
 	function formatDate(str) {
-		let parts = str.split("-"),
-			year = parseInt(parts[0], 10) || 1,
-			month = parseInt(parts[1], 10) || 1,
-			day = parseInt(parts[2], 10) || 1,
+		let parts = getDateParts(str),
 			monthName = ""
 
-		switch (month) {
+		switch (parts.month) {
 			case 1: monthName = "Januari"; break
 			case 2: monthName = "Februari"; break
 			case 3: monthName = "Maret"; break
@@ -72,7 +83,7 @@ export function Home() {
 			case 12: monthName = "Desember"; break
 		}
 
-		return `${day} ${monthName} ${year}`
+		return `${parts.day} ${monthName} ${parts.year}`
 	}
 
 	// API function
@@ -223,6 +234,66 @@ export function Home() {
 			})
 	}
 
+	function saveNewEntry(data) {
+		state.loading = true
+		state.dlgNewEntry.loading = true
+		state.dlgTransferEntry.loading = true
+		m.redraw()
+
+		data.accountId = state.activeAccount.id
+
+		let options = {
+			method: "POST",
+			body: JSON.stringify(data)
+		}
+
+		request("/api/entry", timeoutDuration, options)
+			.then(entry => {
+				// Update list
+				state.activeAccount.entries.unshift(entry)
+				state.activeAccount.entries.sort((a, b) => {
+					let dateA = getDateParts(a.entryDate),
+						dateB = getDateParts(b.entryDate),
+						intDateA = dateA.year * 365 + dateA.month * 30 + dateA.day,
+						intDateB = dateB.year * 365 + dateB.month * 30 + dateB.day
+					return intDateB - intDateA
+				})
+
+				// Update sum
+				let entryAmount = Big(entry.amount)
+				if (entry.entryType !== 1) entryAmount = entryAmount.times(-1)
+
+				let idx = state.accounts.findIndex(acc => acc.id === state.activeAccount.id),
+					affectedIdx = state.accounts.findIndex(acc => acc.id === entry.affectedAccountId)
+
+				if (idx >= 0) {
+					let account = state.accounts[idx],
+						newTotal = Big(account.total).plus(entryAmount).toString()
+
+					state.activeAccount.total = newTotal
+					state.accounts[idx].total = newTotal
+				}
+
+				if (affectedIdx >= 0) {
+					let account = state.accounts[affectedIdx],
+						newTotal = Big(account.total).minus(entryAmount).toString()
+					state.accounts[affectedIdx].total = newTotal
+				}
+			})
+			.catch(err => {
+				state.dlgError.message = err.message
+				state.dlgError.visible = true
+			})
+			.finally(() => {
+				state.loading = false
+				state.dlgNewEntry.loading = false
+				state.dlgNewEntry.visible = false
+				state.dlgTransferEntry.loading = false
+				state.dlgTransferEntry.visible = false
+				m.redraw()
+			})
+	}
+
 	// Render view
 	function renderView(vnode) {
 		// Prepare dialogs
@@ -268,6 +339,48 @@ export function Home() {
 				loading: state.dlgDeleteAccount.loading,
 				onAccepted() { deleteAccount() },
 				onRejected() { state.dlgDeleteAccount.visible = false }
+			}))
+		}
+
+		if (dialogs.length === 0 && state.dlgNewEntry.visible) {
+			dialogs.push(m(DialogFormEntry, {
+				title: "Entry Baru",
+				loading: state.dlgNewEntry.loading,
+				onRejected() { state.dlgNewEntry.visible = false },
+				onAccepted(data) {
+					if (data.entryType === 3) {
+						if (data.description.trim() === "") {
+							data.description = null
+						}
+
+						state.dlgTransferEntry.entry = data
+						state.dlgTransferEntry.visible = true
+						state.dlgNewEntry.visible = false
+					} else {
+						saveNewEntry(data)
+					}
+				}
+			}))
+		}
+
+		if (dialogs.length === 0 && state.dlgTransferEntry.visible) {
+			let listAccounts = state.accounts
+				.filter(acc => acc.id !== state.activeAccount.id)
+				.map(account => {
+					return { caption: account.name, value: String(account.id) }
+				})
+
+			dialogs.push(m(DialogListAccount, {
+				title: "Entry Transfer",
+				loading: state.dlgTransferEntry.loading,
+				accounts: listAccounts,
+				onRejected() { state.dlgTransferEntry.visible = false },
+				onAccepted(data) {
+					let newEntry = state.dlgTransferEntry.entry
+					if (newEntry == null || typeof newEntry != "object") newEntry = {}
+					newEntry.affectedAccountId = data.affectedAccountId
+					saveNewEntry(newEntry)
+				}
 			}))
 		}
 
@@ -457,6 +570,7 @@ export function Home() {
 						class: "home-list__header__button",
 						icon: "fa-plus-circle",
 						caption: "Tambah entry",
+						onclick() { state.dlgNewEntry.visible = true }
 					}),
 				),
 				...entryListNodes,
