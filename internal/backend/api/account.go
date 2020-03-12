@@ -53,7 +53,7 @@ func (h *Handler) SelectAccounts(w http.ResponseWriter, r *http.Request, ps http
 	defer tx.Rollback()
 
 	// Prepare SQL statement
-	stmtSelectAccounts, err := tx.Preparex(sqlSelectAccount)
+	stmtSelectAccounts, err := tx.Preparex(sqlSelectAccount + ` ORDER BY a.name`)
 	checkError(err)
 
 	// Fetch from database
@@ -220,10 +220,15 @@ func (h *Handler) UpdateAccount(w http.ResponseWriter, r *http.Request, ps httpr
 	checkError(err)
 }
 
-// DeleteAccount is handler for DELETE /api/account/:id
-func (h *Handler) DeleteAccount(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+// DeleteAccounts is handler for DELETE /api/accounts
+func (h *Handler) DeleteAccounts(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	// Make sure session still valid
 	h.auth.MustAuthenticateUser(r)
+
+	// Decode request
+	var ids []int
+	err := json.NewDecoder(r.Body).Decode(&ids)
+	checkError(err)
 
 	// Start transaction
 	// Make sure to rollback if panic ever happened
@@ -236,10 +241,15 @@ func (h *Handler) DeleteAccount(w http.ResponseWriter, r *http.Request, ps httpr
 		}
 	}()
 
-	// Delete fromj database
-	tx.MustExec(`DELETE FROM account WHERE id = ?`, ps.ByName("id"))
+	// Delete from database
+	stmt, err := tx.Preparex(`DELETE FROM account WHERE id = ?`)
+	checkError(err)
+
+	for _, id := range ids {
+		stmt.MustExec(id)
+	}
 
 	// Commit transaction
-	err := tx.Commit()
+	err = tx.Commit()
 	checkError(err)
 }

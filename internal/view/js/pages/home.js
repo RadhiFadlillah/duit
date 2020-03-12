@@ -1,6 +1,7 @@
 import {
 	Button,
 	LoadingCover,
+	AccountList,
 } from "../components/_components.min.js"
 
 import {
@@ -13,6 +14,7 @@ import {
 
 import {
 	request,
+	cloneObject,
 	mergeObject,
 } from "../libs/utils.min.js"
 
@@ -23,10 +25,13 @@ import {
 export function Home() {
 	let state = {
 		loading: false,
-		accountsLoading: false,
-		entriesLoading: false,
 
 		accounts: [],
+		selectedAccounts: [],
+		accountsLoading: false,
+
+		entriesLoading: false,
+
 		activeAccount: {
 			id: 0,
 			name: "",
@@ -97,6 +102,7 @@ export function Home() {
 		request("/api/accounts", timeoutDuration)
 			.then(json => {
 				state.accounts = json
+				state.activeAccount = null
 			})
 			.catch(err => {
 				state.dlgError.message = err.message
@@ -105,31 +111,6 @@ export function Home() {
 			.finally(() => {
 				state.loading = false
 				state.accountsLoading = false
-				m.redraw()
-			})
-	}
-
-	function loadEntries() {
-		state.loading = true
-		state.entriesLoading = true
-		m.redraw()
-
-		let url = new URL(`/api/account/${state.activeAccount.id}`, document.baseURI)
-		url.searchParams.set("page", state.pagination.page)
-
-		request(url.toString(), timeoutDuration)
-			.then(json => {
-				state.pagination.page = json.page
-				state.pagination.maxPage = json.maxPage
-				state.activeAccount.entries = json.entries
-			})
-			.catch(err => {
-				state.dlgError.message = err.message
-				state.dlgError.visible = true
-			})
-			.finally(() => {
-				state.loading = false
-				state.entriesLoading = false
 				m.redraw()
 			})
 	}
@@ -173,25 +154,20 @@ export function Home() {
 		state.dlgEditAccount.loading = true
 		m.redraw()
 
-		let options = {
-			method: "PUT",
-			body: JSON.stringify({
-				id: state.activeAccount.id,
-				name: data.name,
-				initialAmount: data.initialAmount
-			})
-		}
+		let idx = state.selectedAccounts[0],
+			account = state.accounts[idx],
+			options = {
+				method: "PUT",
+				body: JSON.stringify({
+					id: account.id,
+					name: data.name,
+					initialAmount: data.initialAmount
+				})
+			}
 
 		request("/api/account", timeoutDuration, options)
 			.then(json => {
-				let idx = state.accounts.findIndex(account => account.id === json.id),
-					newAccount = json
-
-				// Replace data
-				state.accounts.splice(idx, 1, newAccount)
-				state.activeAccount.name = newAccount.name
-				state.activeAccount.total = newAccount.total
-				state.activeAccount.initialAmount = newAccount.initialAmount
+				state.accounts.splice(idx, 1, json)
 			})
 			.catch(err => {
 				state.dlgError.message = err.message
@@ -205,22 +181,26 @@ export function Home() {
 			})
 	}
 
-	function deleteAccount() {
+	function deleteAccounts() {
 		state.loading = true
 		state.dlgDeleteAccount.loading = true
 		m.redraw()
 
-		let url = `/api/account/${state.activeAccount.id}`,
-			options = { method: "DELETE", }
+		let ids = state.selectedAccounts.map(idx => {
+			return state.accounts[idx].id
+		})
 
-		request(url, timeoutDuration, options)
+		let options = {
+			method: "DELETE",
+			body: JSON.stringify(ids)
+		}
+
+		request("/api/accounts", timeoutDuration, options)
 			.then(() => {
-				let deletedIdx = state.accounts.findIndex(account => {
-					return account.id === state.activeAccount.id
-				})
-
-				state.accounts.splice(deletedIdx, 1)
-				state.activeAccount.id = 0
+				state.selectedAccounts
+					.sort((a, b) => b - a)
+					.forEach(idx => { state.accounts.splice(idx, 1) })
+				state.selectedAccounts.splice(0, state.selectedAccounts.length)
 			})
 			.catch(err => {
 				state.dlgError.message = err.message
@@ -230,6 +210,31 @@ export function Home() {
 				state.loading = false
 				state.dlgDeleteAccount.loading = false
 				state.dlgDeleteAccount.visible = false
+				m.redraw()
+			})
+	}
+
+	function loadEntries() {
+		state.loading = true
+		state.entriesLoading = true
+		m.redraw()
+
+		let url = new URL(`/api/account/${state.activeAccount.id}`, document.baseURI)
+		url.searchParams.set("page", state.pagination.page)
+
+		request(url.toString(), timeoutDuration)
+			.then(json => {
+				state.pagination.page = json.page
+				state.pagination.maxPage = json.maxPage
+				state.activeAccount.entries = json.entries
+			})
+			.catch(err => {
+				state.dlgError.message = err.message
+				state.dlgError.visible = true
+			})
+			.finally(() => {
+				state.loading = false
+				state.entriesLoading = false
 				m.redraw()
 			})
 	}
@@ -316,10 +321,9 @@ export function Home() {
 		}
 
 		if (dialogs.length === 0 && state.dlgEditAccount.visible) {
-			let defaultValue = {
-				name: state.activeAccount.name,
-				initialAmount: state.activeAccount.initialAmount,
-			}
+			let idx = state.selectedAccounts[0],
+				account = state.accounts[idx],
+				defaultValue = cloneObject(account)
 
 			dialogs.push(m(DialogFormAccount, {
 				title: "Edit Akun",
@@ -333,11 +337,11 @@ export function Home() {
 		if (dialogs.length === 0 && state.dlgDeleteAccount.visible) {
 			dialogs.push(m(DialogConfirm, {
 				title: "Delete Akun",
-				message: `Yakin ingin menghapus akun "${state.activeAccount.name}" ?`,
+				message: `Yakin ingin menghapus ${state.selectedAccounts.length} akun ?`,
 				acceptText: "Ya",
 				rejectText: "Tidak",
 				loading: state.dlgDeleteAccount.loading,
-				onAccepted() { deleteAccount() },
+				onAccepted() { deleteAccounts() },
 				onRejected() { state.dlgDeleteAccount.visible = false }
 			}))
 		}
@@ -392,99 +396,74 @@ export function Home() {
 		}
 
 		// Prepare home contents
-		let homeContents = []
-
-		// First, prepare list of account
-		let accountListTitle = "Daftar Akun",
-			accountListNodes = []
-
-		if (!state.accountsLoading && state.accounts.length > 0) {
-			let sumAccount = state.accounts.reduce((sum, account) => {
-				return sum.plus(Number(account.total))
-			}, Big(0))
-
-			accountListTitle = `Total ${formatNumber(sumAccount)}`
-		}
-
-		if (state.accountsLoading) {
-			accountListNodes = [m("i.fas.fa-fw.fa-spin.fa-spinner.home-list__loading-sign")]
-		} else if (state.accounts.length === 0) {
-			accountListNodes = [m("p.home-list__empty-message", "Belum ada akun terdaftar")]
-		} else {
-			accountListNodes = state.accounts.map(account => {
-				let attrs = {}
-				if (account.id !== state.activeAccount.id) attrs.onclick = () => {
-					state.activeAccount = account
-					loadEntries()
-				}
-
-				return m(".account", attrs,
-					m("p.account__name", account.name),
-					m("p.account__amount", formatNumber(account.total)),
-				)
+		let homeContents = [
+			m(AccountList, {
+				class: "home-account-list",
+				loading: state.accountsLoading,
+				accounts: state.accounts,
+				selection: state.selectedAccounts,
+				onNewClicked() { state.dlgNewAccount.visible = true },
+				onEditClicked() { state.dlgEditAccount.visible = true },
+				onDeleteClicked() { state.dlgDeleteAccount.visible = true },
+				onItemClicked(account) {
+					let activeAccount = state.activeAccount || {}
+					if (account.id !== activeAccount.id) {
+						state.activeAccount = account
+						loadEntries()
+					}
+				},
 			})
-		}
-
-		homeContents.push(m(".home-list.account-list",
-			m(".home-list__header.account-list__header",
-				m("p.home-list__header__title", accountListTitle),
-				m(Button, {
-					iconOnly: true,
-					class: "home-list__header__button",
-					icon: "fa-plus-circle",
-					caption: "Akun baru",
-					onclick() { state.dlgNewAccount.visible = true }
-				}),
-			),
-			...accountListNodes,
-		))
+		]
 
 		// Next, prepare list of entry
-		let entryListTitle = `${state.activeAccount.name}, ${formatNumber(state.activeAccount.total)}`,
+		let entryListTitle = "",
 			entryListNodes = []
 
-		if (state.entriesLoading) {
-			entryListNodes = [m("i.fas.fa-fw.fa-spin.fa-spinner.home-list__loading-sign")]
-		} else if (state.activeAccount.entries.length === 0) {
-			entryListNodes = [m("p.home-list__empty-message", "Belum ada entry yang terdaftar")]
-		} else {
-			state.activeAccount.entries.forEach((entry, idx) => {
-				let entryClass = "",
-					entryAmount = Big(entry.amount),
-					entryDescription = entry.description
+		if (state.activeAccount != null) {
+			entryListTitle = `${state.activeAccount.name}, ${formatNumber(state.activeAccount.total)}`
+			if (state.entriesLoading) {
+				entryListNodes = [m("i.fas.fa-fw.fa-spin.fa-spinner.home-list__loading-sign")]
+			} else if (state.activeAccount.entries.length === 0) {
+				entryListNodes = [m("p.home-list__empty-message", "Belum ada entry yang terdaftar")]
+			} else {
+				state.activeAccount.entries.forEach((entry, idx) => {
+					let entryClass = "",
+						entryAmount = Big(entry.amount),
+						entryDescription = entry.description
 
-				if (entry.entryType === 1) {
-					entryClass = "entry--income"
-				} else if (entry.entryType === 2) {
-					entryClass = "entry--expense"
-					entryAmount = entryAmount.times(-1)
-				} else {
-					let accountIsReceiver = state.activeAccount.id === entry.affectedAccountId,
-						relatedAccountId = accountIsReceiver ? entry.accountId : entry.affectedAccountId,
-						relatedAccount = state.accounts.find(acc => acc.id === relatedAccountId),
-						relatedName = relatedAccount ? relatedAccount.name : ""
-
-					entryClass = "entry--transfer"
-					if (accountIsReceiver) {
-						entryDescription = `Masuk dari ${relatedName}`
-					} else {
-						entryDescription = `Pindah ke ${relatedName}`
+					if (entry.entryType === 1) {
+						entryClass = "entry--income"
+					} else if (entry.entryType === 2) {
+						entryClass = "entry--expense"
 						entryAmount = entryAmount.times(-1)
+					} else {
+						let accountIsReceiver = state.activeAccount.id === entry.affectedAccountId,
+							relatedAccountId = accountIsReceiver ? entry.accountId : entry.affectedAccountId,
+							relatedAccount = state.accounts.find(acc => acc.id === relatedAccountId),
+							relatedName = relatedAccount ? relatedAccount.name : ""
+
+						entryClass = "entry--transfer"
+						if (accountIsReceiver) {
+							entryDescription = `Masuk dari ${relatedName}`
+						} else {
+							entryDescription = `Pindah ke ${relatedName}`
+							entryAmount = entryAmount.times(-1)
+						}
 					}
-				}
 
-				let previousEntry = state.activeAccount.entries[idx - 1]
-				if (previousEntry == null || entry.entryDate !== previousEntry.entryDate) {
-					entryListNodes.push(m(".entry__date", formatDate(entry.entryDate)))
-				}
+					let previousEntry = state.activeAccount.entries[idx - 1]
+					if (previousEntry == null || entry.entryDate !== previousEntry.entryDate) {
+						entryListNodes.push(m(".entry__date", formatDate(entry.entryDate)))
+					}
 
-				entryListNodes.push(m(".entry",
-					m("p.entry__description", entryDescription),
-					m("p.entry__amount", { class: entryClass }, formatNumber(entryAmount)),
-				))
-			})
+					entryListNodes.push(m(".entry",
+						m("p.entry__description", entryDescription),
+						m("p.entry__amount", { class: entryClass }, formatNumber(entryAmount)),
+					))
+				})
 
-			entryListNodes.push(m(".entry-list__space"))
+				entryListNodes.push(m(".entry-list__space"))
+			}
 		}
 
 		// Add pagination to entry list if needed
@@ -547,7 +526,7 @@ export function Home() {
 			))
 		}
 
-		if (state.activeAccount.id !== 0) {
+		if (state.activeAccount != null) {
 			homeContents.push(m(".home-list.entry-list",
 				m(".home-list__header.entry-list__header",
 					m("p.home-list__header__title", entryListTitle),

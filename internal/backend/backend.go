@@ -23,7 +23,7 @@ type SlowDown struct {
 
 func (sd SlowDown) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if strings.HasPrefix(r.URL.Path, "/api") {
-		time.Sleep(1000 * time.Millisecond)
+		time.Sleep(0 * time.Millisecond)
 	}
 
 	sd.router.ServeHTTP(w, r)
@@ -63,7 +63,7 @@ func ServeApp(db *sqlx.DB, port int) error {
 	router.GET("/api/account/:id", apiHdl.GetAccountEntries)
 	router.POST("/api/account", apiHdl.InsertAccount)
 	router.PUT("/api/account", apiHdl.UpdateAccount)
-	router.DELETE("/api/account/:id", apiHdl.DeleteAccount)
+	router.DELETE("/api/accounts", apiHdl.DeleteAccounts)
 
 	router.POST("/api/entry", apiHdl.InsertEntry)
 
