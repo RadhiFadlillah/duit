@@ -112,10 +112,24 @@ func (h *Handler) InsertEntry(w http.ResponseWriter, r *http.Request, ps httprou
 		}
 	}()
 
-	// Save to database
-	res := tx.MustExec(`INSERT INTO entry 
+	// Prepare statements
+	stmtInsertEntry, err := tx.Preparex(`INSERT INTO entry 
 		(account_id, affected_account_id, type, description, amount, date)
-		VALUES (?, ?, ?, ?, ?, ?)`,
+		VALUES (?, ?, ?, ?, ?, ?)`)
+	checkError(err)
+
+	stmtGetEntry, err := tx.Preparex(`
+		SELECT e.id, e.account_id, e.affected_account_id,
+			a1.name account, a2.name affected_account,
+			e.type, e.description, e.amount, e.date
+		FROM entry e
+		LEFT JOIN account a1 ON e.account_id = a1.id
+		LEFT JOIN account a2 ON e.affected_account_id = a2.id
+		WHERE e.id = ?`)
+	checkError(err)
+
+	// Save to database
+	res := stmtInsertEntry.MustExec(
 		entry.AccountID,
 		entry.AffectedAccountID,
 		entry.Type,
@@ -123,6 +137,10 @@ func (h *Handler) InsertEntry(w http.ResponseWriter, r *http.Request, ps httprou
 		entry.Amount,
 		entry.Date)
 	entry.ID, _ = res.LastInsertId()
+
+	// Fetch the inserted data
+	err = stmtGetEntry.Get(&entry, entry.ID)
+	checkError(err)
 
 	// Commit transaction
 	err = tx.Commit()

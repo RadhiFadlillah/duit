@@ -9,13 +9,14 @@ import {
 	DialogError,
 	DialogConfirm,
 	DialogFormAccount,
+	DialogEntryType,
 	DialogFormEntry,
-	DialogListAccount,
 } from "../dialogs/_dialogs.min.js"
 
 import {
 	request,
 	cloneObject,
+	getDateParts,
 	mergeObject,
 } from "../libs/utils.min.js"
 
@@ -44,47 +45,9 @@ export function Home() {
 		dlgNewAccount: { visible: false, loading: false },
 		dlgEditAccount: { visible: false, loading: false },
 		dlgDeleteAccount: { visible: false, loading: false },
-		dlgNewEntry: { visible: false, loading: false },
-		dlgTransferEntry: { visible: false, loading: false, entry: null },
-	}
 
-	// Local function
-	function formatNumber(val) {
-		return Number(val).toLocaleString("id-ID", {
-			maximumFractionDigits: 0
-		})
-	}
-
-	function getDateParts(str) {
-		let parts = str.split("-")
-
-		return {
-			year: parseInt(parts[0], 10) || 1,
-			month: parseInt(parts[1], 10) || 1,
-			day: parseInt(parts[2], 10) || 1,
-		}
-	}
-
-	function formatDate(str) {
-		let parts = getDateParts(str),
-			monthName = ""
-
-		switch (parts.month) {
-			case 1: monthName = "Januari"; break
-			case 2: monthName = "Februari"; break
-			case 3: monthName = "Maret"; break
-			case 4: monthName = "April"; break
-			case 5: monthName = "Mei"; break
-			case 6: monthName = "Juni"; break
-			case 7: monthName = "Juli"; break
-			case 8: monthName = "Agustus"; break
-			case 9: monthName = "September"; break
-			case 10: monthName = "Oktober"; break
-			case 11: monthName = "November"; break
-			case 12: monthName = "Desember"; break
-		}
-
-		return `${parts.day} ${monthName} ${parts.year}`
+		dlgEntryType: { visible: false },
+		dlgNewEntry: { visible: false, loading: false, type: 0 },
 	}
 
 	// API function
@@ -124,6 +87,7 @@ export function Home() {
 
 		request("/api/account", timeoutDuration, options)
 			.then(account => {
+				state.selectedAccounts = []
 				state.accounts.push(account)
 				state.accounts.sort((a, b) => {
 					let nameA = a.name.toLowerCase(),
@@ -197,7 +161,12 @@ export function Home() {
 				state.selectedAccounts
 					.sort((a, b) => b - a)
 					.forEach(idx => { state.accounts.splice(idx, 1) })
-				state.selectedAccounts.splice(0, state.selectedAccounts.length)
+				state.selectedAccounts = []
+
+				if (state.activeAccount != null) {
+					let idx = ids.findIndex(id => id === state.activeAccount.id)
+					if (idx !== -1) state.activeAccount = null
+				}
 			})
 			.catch(err => {
 				state.dlgError.message = err.message
@@ -236,6 +205,60 @@ export function Home() {
 			.finally(() => {
 				state.loading = false
 				state.entriesLoading = false
+				m.redraw()
+			})
+	}
+
+	function saveNewEntry(data) {
+		if (state.activeAccount == null) return
+		data.accountId = state.activeAccount.id
+
+		state.loading = true
+		state.dlgNewEntry.loading = true
+		m.redraw()
+
+		let options = {
+			method: "POST",
+			body: JSON.stringify(data)
+		}
+
+		request("/api/entry", timeoutDuration, options)
+			.then(entry => {
+				// Update list
+				state.selectedEntries = []
+				state.entries.unshift(entry)
+				state.entries.sort((a, b) => {
+					let dateA = getDateParts(a.date),
+						dateB = getDateParts(b.date),
+						intDateA = dateA.year * 365 + dateA.month * 30 + dateA.day,
+						intDateB = dateB.year * 365 + dateB.month * 30 + dateB.day
+					return intDateB - intDateA
+				})
+
+				// Update sum
+				let idx = state.accounts.findIndex(acc => acc.id === entry.accountId),
+					affectedIdx = state.accounts.findIndex(acc => acc.id === entry.affectedAccountId),
+					amount = entry.type === 1 ? Big(entry.amount) : Big(entry.amount).times(-1),
+					account = state.accounts[idx]
+
+				account.total = Big(account.total).plus(amount).toString()
+				state.accounts[idx] = account
+				state.activeAccount = account
+
+				if (affectedIdx >= 0) {
+					let account = state.accounts[affectedIdx]
+					account.total = Big(account.total).minus(amount).toString()
+					state.accounts[affectedIdx] = account
+				}
+			})
+			.catch(err => {
+				state.dlgError.message = err.message
+				state.dlgError.visible = true
+			})
+			.finally(() => {
+				state.loading = false
+				state.dlgNewEntry.loading = false
+				state.dlgNewEntry.visible = false
 				m.redraw()
 			})
 	}
@@ -287,6 +310,36 @@ export function Home() {
 			}))
 		}
 
+		if (dialogs.length === 0 && state.dlgEntryType.visible) {
+			dialogs.push(m(DialogEntryType, {
+				title: "Jenis Entry",
+				onRejected() { state.dlgEntryType.visible = false },
+				onAccepted(data) {
+					state.dlgNewEntry.type = data.type
+					state.dlgNewEntry.visible = true
+					state.dlgEntryType.visible = false
+				},
+			}))
+		}
+
+		if (dialogs.length === 0 && state.dlgNewEntry.visible) {
+			let title = ""
+			switch (state.dlgNewEntry.type) {
+				case 1: title = "Pemasukan Baru"; break
+				case 2: title = "Pengeluaran Baru"; break
+				case 3: title = "Transfer Baru"; break
+			}
+
+			dialogs.push(m(DialogFormEntry, {
+				title: title,
+				loading: state.dlgNewEntry.loading,
+				accounts: state.accounts,
+				entryType: state.dlgNewEntry.type,
+				onAccepted(data) { saveNewEntry(data) },
+				onRejected() { state.dlgNewEntry.visible = false }
+			}))
+		}
+
 		// Prepare loading cover
 		let covers = []
 
@@ -323,7 +376,7 @@ export function Home() {
 				selection: state.selectedEntries,
 				currentPage: state.pagination.page,
 				maxPage: state.pagination.maxPage,
-				onNewClicked() { }, // TODO
+				onNewClicked() { state.dlgEntryType.visible = true },
 				onEditClicked() { }, // TODO
 				onDeleteClicked() { }, // TODO
 				onItemClicked(entry) { }, // TODO

@@ -164,7 +164,7 @@ export function EntryList() {
 						if (accountIsReceiver) {
 							tmpDescription = `Masuk dari ${entry.account}`
 						} else {
-							tmpDescription = `Masuk dari ${entry.affectedAccount}`
+							tmpDescription = `Pindah ke ${entry.affectedAccount}`
 							amount = amount.times(-1)
 						}
 
