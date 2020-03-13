@@ -83,44 +83,42 @@ export function AccountList() {
 		let title = "Daftar Akun"
 		if (accounts.length > 0) title = `Total ${formatNumber(sumAccount)}`
 
-		let buttons = [],
-			buttonAttrs = {
+		let headerContents = [m("p.account-list__header__title", title)],
+			headerButtonAttrs = {
 				iconOnly: true,
 				class: "account-list__header__button",
 			}
 
-		if (selection.length === 1) buttons.unshift(
-			m(Button, mergeObject(buttonAttrs, {
+		if (accounts.length > 0 && !loading) headerContents.unshift(
+			m("input[type=checkbox].account__check", {
+				checked: selection.length === accounts.length,
+				onclick() { toggleAllSelection(selection, accounts.length) }
+			})
+		)
+
+		if (selection.length === 1) headerContents.push(
+			m(Button, mergeObject(headerButtonAttrs, {
 				icon: "fa-pen",
-				caption: "Edit akun",
+				caption: "Edit entry",
 				onclick() { onEditClicked() }
 			}))
 		)
 
-		if (selection.length >= 1) buttons.unshift(
-			m(Button, mergeObject(buttonAttrs, {
+		if (selection.length >= 1) headerContents.push(
+			m(Button, mergeObject(headerButtonAttrs, {
 				icon: "fa-trash-alt",
-				caption: "Delete akun",
+				caption: "Delete entry",
 				onclick() { onDeleteClicked() }
 			}))
 		)
 
-		buttons.push(
-			m(Button, mergeObject(buttonAttrs, {
-				icon: "fa-plus-circle",
-				caption: "Akun baru",
-				onclick() { onNewClicked() }
-			}))
-		)
+		headerContents.push(m(Button, mergeObject(headerButtonAttrs, {
+			icon: "fa-plus-circle",
+			caption: "Akun baru",
+			onclick() { onNewClicked() }
+		})))
 
-		let header = m(".account-list__header",
-			m("input[type=checkbox].account__check", {
-				checked: selection.length === accounts.length,
-				onclick() { toggleAllSelection(selection, accounts.length) }
-			}),
-			m("p.account-list__header__title", title),
-			...buttons
-		)
+		let header = m(".account-list__header", headerContents)
 
 		// Render list content
 		let contents = []

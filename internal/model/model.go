@@ -39,8 +39,12 @@ type Entry struct {
 	ID                int64           `db:"id"                  json:"id"`
 	AccountID         int64           `db:"account_id"          json:"accountId"`
 	AffectedAccountID null.Int        `db:"affected_account_id" json:"affectedAccountId"`
-	EntryType         int             `db:"entry_type"          json:"entryType"`
+	Type              int             `db:"type"                json:"type"`
 	Description       null.String     `db:"description"         json:"description"`
 	Amount            decimal.Decimal `db:"amount"              json:"amount"`
-	EntryDate         string          `db:"entry_date"          json:"entryDate"`
+	Date              string          `db:"date"                json:"date"`
+
+	// Additional foreign key fields
+	Account         string      `db:"account"          json:"account"`
+	AffectedAccount null.String `db:"affected_account" json:"affectedAccount"`
 }

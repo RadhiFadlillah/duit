@@ -26,16 +26,16 @@ CREATE TABLE IF NOT EXISTS entry (
 	id                  INT UNSIGNED  NOT NULL AUTO_INCREMENT,
 	account_id          INT UNSIGNED  NOT NULL,
 	affected_account_id INT UNSIGNED  DEFAULT NULL,
-	entry_type          INT UNSIGNED  NOT NULL,
+	type                INT UNSIGNED  NOT NULL,
 	description         VARCHAR(150)  DEFAULT NULL,
 	amount              DECIMAL(20,4) NOT NULL,
-	entry_date          DATE          NOT NULL,
+	date                DATE          NOT NULL,
 	PRIMARY KEY (id),
 	FOREIGN KEY entry_account_id_FK (account_id) REFERENCES account (id)
 		ON UPDATE CASCADE ON DELETE CASCADE,
 	FOREIGN KEY entry_affected_account_id_FK (affected_account_id) REFERENCES account (id)
 		ON UPDATE CASCADE ON DELETE CASCADE,
 	CONSTRAINT CHECK (affected_account_id <> account_id),
-	CONSTRAINT CHECK (entry_type >= 1 AND entry_type <= 3))
+	CONSTRAINT CHECK (type >= 1 AND type <= 3))
 	CHARACTER SET utf8mb4
 `

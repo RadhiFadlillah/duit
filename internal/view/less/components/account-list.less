@@ -10,6 +10,20 @@
 	flex-shrink: 0;
 }
 
+.account-list__empty-message {
+	margin   : auto;
+	font-size: 0.9rem;
+	color    : var(--link-color);
+}
+
+.account-list__loading-sign {
+	margin   : auto;
+	font-size: 4rem;
+	color    : var(--link-color);
+}
+
+// Header styles
+
 .account-list__header {
 	position   : sticky;
 	top        : 0;
@@ -48,24 +62,14 @@
 	}
 }
 
-.account-list__empty-message {
-	margin   : auto;
-	font-size: 0.9rem;
-	color    : var(--link-color);
-}
-
-.account-list__loading-sign {
-	margin   : auto;
-	font-size: 4rem;
-	color    : var(--link-color);
-}
+// Item styles
 
 .account {
 	display      : flex;
 	flex-flow    : row nowrap;
-	padding      : 0.5rem;
 	border-bottom: 1px solid var(--border);
 	cursor       : pointer;
+	padding-left : 0.5rem;
 
 	&:hover,
 	&:focus {
@@ -80,9 +84,11 @@
 }
 
 .account__data {
-	display  : flex;
-	flex-flow: column nowrap;
-	flex     : 1 0;
+	display     : flex;
+	flex-flow   : column nowrap;
+	flex        : 1 0;
+	padding     : 0.5rem;
+	padding-left: 0;
 }
 
 .account__name {

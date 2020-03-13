@@ -1,12 +1,95 @@
 package api
 
 import (
+	"database/sql"
 	"encoding/json"
+	"fmt"
 	"net/http"
 
 	"github.com/RadhiFadlillah/duit/internal/model"
 	"github.com/julienschmidt/httprouter"
 )
+
+// SelectEntries is handler for GET /api/entries
+func (h *Handler) SelectEntries(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	// Make sure session still valid
+	h.auth.MustAuthenticateUser(r)
+
+	// Get URL parameter
+	page := strToInt(r.URL.Query().Get("page"))
+	accountID := strToInt(r.URL.Query().Get("account"))
+
+	// Start transaction
+	// We only use it to fetch the data,
+	// so just rollback it later
+	tx := h.db.MustBegin()
+	defer tx.Rollback()
+
+	// Prepare SQL statement
+	stmtGetAccount, err := tx.Preparex(`SELECT id FROM account WHERE id = ?`)
+	checkError(err)
+
+	stmtGetEntriesMaxPage, err := tx.Preparex(`
+		SELECT CEIL(COUNT(*) / ?) FROM entry
+		WHERE account_id = ?
+		OR affected_account_id = ?`)
+	checkError(err)
+
+	stmtSelectEntries, err := tx.Preparex(`
+		SELECT e.id, e.account_id, e.affected_account_id,
+			a1.name account, a2.name affected_account,
+			e.type, e.description, e.amount, e.date
+		FROM entry e
+		LEFT JOIN account a1 ON e.account_id = a1.id
+		LEFT JOIN account a2 ON e.affected_account_id = a2.id
+		WHERE e.account_id = ?
+		OR e.affected_account_id = ?
+		ORDER BY e.date DESC, e.id DESC
+		LIMIT ? OFFSET ?`)
+	checkError(err)
+
+	// Make sure account exist
+	var tmpID int64
+	err = stmtGetAccount.Get(&tmpID, accountID)
+	checkError(err)
+
+	if err == sql.ErrNoRows {
+		panic(fmt.Errorf("account doesn't exist"))
+	}
+
+	// Get entry count and calculate max page
+	var maxPage int
+	err = stmtGetEntriesMaxPage.Get(&maxPage, pageLength,
+		accountID, accountID)
+	checkError(err)
+
+	if page == 0 {
+		page = 1
+	} else if page > maxPage {
+		page = maxPage
+	}
+
+	offset := (page - 1) * pageLength
+
+	// Fetch entries from database
+	entries := []model.Entry{}
+	err = stmtSelectEntries.Select(&entries,
+		accountID, accountID,
+		pageLength, offset)
+	checkError(err)
+
+	// Return final result
+	result := map[string]interface{}{
+		"page":    page,
+		"maxPage": maxPage,
+		"entries": entries,
+	}
+
+	w.Header().Add("Content-Encoding", "gzip")
+	w.Header().Add("Content-Type", "application/json")
+	err = encodeGzippedJSON(w, &result)
+	checkError(err)
+}
 
 // InsertEntry is handler for POST /api/entry
 func (h *Handler) InsertEntry(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
@@ -31,14 +114,14 @@ func (h *Handler) InsertEntry(w http.ResponseWriter, r *http.Request, ps httprou
 
 	// Save to database
 	res := tx.MustExec(`INSERT INTO entry 
-		(account_id, affected_account_id, entry_type, description, amount, entry_date)
+		(account_id, affected_account_id, type, description, amount, date)
 		VALUES (?, ?, ?, ?, ?, ?)`,
 		entry.AccountID,
 		entry.AffectedAccountID,
-		entry.EntryType,
+		entry.Type,
 		entry.Description,
 		entry.Amount,
-		entry.EntryDate)
+		entry.Date)
 	entry.ID, _ = res.LastInsertId()
 
 	// Commit transaction
