@@ -146,7 +146,64 @@ func (h *Handler) InsertEntry(w http.ResponseWriter, r *http.Request, ps httprou
 	err = tx.Commit()
 	checkError(err)
 
-	// Return inserted account
+	// Return inserted entry
+	w.Header().Add("Content-Encoding", "gzip")
+	w.Header().Add("Content-Type", "application/json")
+	err = encodeGzippedJSON(w, &entry)
+	checkError(err)
+}
+
+// UpdateEntry is handler for PUT /api/entry
+func (h *Handler) UpdateEntry(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	// Make sure session still valid
+	h.auth.MustAuthenticateUser(r)
+
+	// Decode request
+	var entry model.Entry
+	err := json.NewDecoder(r.Body).Decode(&entry)
+	checkError(err)
+
+	// Start transaction
+	// Make sure to rollback if panic ever happened
+	tx := h.db.MustBegin()
+
+	defer func() {
+		if r := recover(); r != nil {
+			tx.Rollback()
+			panic(r)
+		}
+	}()
+
+	// Prepare statements
+	stmtUpdateEntry, err := tx.Preparex(`UPDATE entry 
+		SET affected_account_id = ?, description = ?, amount = ?, date = ?
+		WHERE id = ?`)
+	checkError(err)
+
+	stmtGetEntry, err := tx.Preparex(`
+		SELECT e.id, e.account_id, e.affected_account_id,
+			a1.name account, a2.name affected_account,
+			e.type, e.description, e.amount, e.date
+		FROM entry e
+		LEFT JOIN account a1 ON e.account_id = a1.id
+		LEFT JOIN account a2 ON e.affected_account_id = a2.id
+		WHERE e.id = ?`)
+	checkError(err)
+
+	// Update database
+	stmtUpdateEntry.MustExec(
+		entry.AffectedAccountID, entry.Description,
+		entry.Amount, entry.Date, entry.ID)
+
+	// Fetch the updated data
+	err = stmtGetEntry.Get(&entry, entry.ID)
+	checkError(err)
+
+	// Commit transaction
+	err = tx.Commit()
+	checkError(err)
+
+	// Return updated entry
 	w.Header().Add("Content-Encoding", "gzip")
 	w.Header().Add("Content-Type", "application/json")
 	err = encodeGzippedJSON(w, &entry)

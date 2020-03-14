@@ -48,6 +48,31 @@ export function Home() {
 
 		dlgEntryType: { visible: false },
 		dlgNewEntry: { visible: false, loading: false, type: 0 },
+		dlgEditEntry: { visible: false, loading: false },
+	}
+
+	// Local method
+	function sortAccounts(a, b) {
+		let nameA = a.name.toLowerCase(),
+			nameB = b.name.toLowerCase()
+
+		if (nameA < nameB) return -1
+		if (nameA > nameB) return 1
+		return 0
+	}
+
+	function sortEntries(a, b) {
+		let dateA = getDateParts(a.date),
+			dateB = getDateParts(b.date),
+			intDateA = dateA.year * 365 + dateA.month * 30 + dateA.day,
+			intDateB = dateB.year * 365 + dateB.month * 30 + dateB.day
+
+		return intDateB - intDateA
+	}
+
+	function filterActiveAccount(account) {
+		if (state.activeAccount == null) return true
+		return account.id !== state.activeAccount.id
 	}
 
 	// API function
@@ -89,14 +114,7 @@ export function Home() {
 			.then(account => {
 				state.selectedAccounts = []
 				state.accounts.push(account)
-				state.accounts.sort((a, b) => {
-					let nameA = a.name.toLowerCase(),
-						nameB = b.name.toLowerCase()
-
-					if (nameA < nameB) return -1
-					if (nameA > nameB) return 1
-					return 0
-				})
+				state.accounts.sort(sortAccounts)
 			})
 			.catch(err => {
 				state.dlgError.message = err.message
@@ -227,13 +245,7 @@ export function Home() {
 				// Update list
 				state.selectedEntries = []
 				state.entries.unshift(entry)
-				state.entries.sort((a, b) => {
-					let dateA = getDateParts(a.date),
-						dateB = getDateParts(b.date),
-						intDateA = dateA.year * 365 + dateA.month * 30 + dateA.day,
-						intDateB = dateB.year * 365 + dateB.month * 30 + dateB.day
-					return intDateB - intDateA
-				})
+				state.entries.sort(sortEntries)
 
 				// Update sum
 				let idx = state.accounts.findIndex(acc => acc.id === entry.accountId),
@@ -259,6 +271,78 @@ export function Home() {
 				state.loading = false
 				state.dlgNewEntry.loading = false
 				state.dlgNewEntry.visible = false
+				m.redraw()
+			})
+	}
+
+	function updateEntry(data) {
+		state.loading = true
+		state.dlgEditEntry.loading = true
+		m.redraw()
+
+		let idx = state.selectedEntries[0],
+			oldEntry = state.entries[idx],
+			options = {
+				method: "PUT",
+				body: JSON.stringify({
+					id: oldEntry.id,
+					affectedAccountId: data.affectedAccountId,
+					description: data.description,
+					amount: data.amount,
+					date: data.date,
+				})
+			}
+
+		request("/api/entry", timeoutDuration, options)
+			.then(entry => {
+				// Update list
+				state.selectedEntries = []
+				state.entries.splice(idx, 1, entry)
+				state.entries.sort(sortEntries)
+
+				// Update sum
+				let accountIdx = state.accounts.findIndex(acc => acc.id === entry.accountId),
+					amount = Big(entry.amount),
+					oldAmount = Big(oldEntry.amount),
+					account = state.accounts[accountIdx]
+
+				if (entry.type !== 1) {
+					amount = amount.times(-1)
+					oldAmount = oldAmount.times(-1)
+				}
+
+				account.total = Big(account.total).minus(oldAmount).plus(amount).toString()
+				state.accounts[accountIdx] = account
+				state.activeAccount = account
+
+				// Update sum for affected account
+				if (entry.type !== 3) return
+				let affectedIdx = state.accounts.findIndex(acc => acc.id === entry.affectedAccountId),
+					oldAffectedIdx = state.accounts.findIndex(acc => acc.id === oldEntry.affectedAccountId)
+
+				if (affectedIdx === oldAffectedIdx) {
+					let account = state.accounts[affectedIdx]
+					account.total = Big(account.total).plus(oldAmount).minus(amount).toString()
+					state.accounts[affectedIdx] = account
+				} else {
+					let account = state.accounts[affectedIdx],
+						oldAccount = state.accounts[oldAffectedIdx]
+
+					account.total = Big(account.total).minus(amount)
+					oldAccount.total = Big(oldAccount.total).plus(oldAmount)
+
+					state.accounts[affectedIdx] = account
+					state.accounts[oldAffectedIdx] = oldAccount
+				}
+			})
+			.catch(err => {
+				state.dlgError.message = err.message
+				state.dlgError.visible = true
+			})
+			.finally(() => {
+				state.loading = false
+				state.dlgEditEntry.loading = false
+				state.dlgEditEntry.visible = false
 				m.redraw()
 			})
 	}
@@ -333,10 +417,33 @@ export function Home() {
 			dialogs.push(m(DialogFormEntry, {
 				title: title,
 				loading: state.dlgNewEntry.loading,
-				accounts: state.accounts,
+				accounts: state.accounts.filter(filterActiveAccount),
 				entryType: state.dlgNewEntry.type,
 				onAccepted(data) { saveNewEntry(data) },
 				onRejected() { state.dlgNewEntry.visible = false }
+			}))
+		}
+
+		if (dialogs.length === 0 && state.dlgEditEntry.visible) {
+			let idx = state.selectedEntries[0],
+				entry = state.entries[idx],
+				defaultValue = cloneObject(entry)
+
+			let title = ""
+			switch (entry.type) {
+				case 1: title = "Edit Pemasukan"; break
+				case 2: title = "Edit Pengeluaran"; break
+				case 3: title = "Edit Transfer"; break
+			}
+
+			dialogs.push(m(DialogFormEntry, {
+				title: title,
+				loading: state.dlgEditEntry.loading,
+				accounts: state.accounts.filter(filterActiveAccount),
+				entryType: entry.type,
+				defaultValue: defaultValue,
+				onAccepted(data) { updateEntry(data) },
+				onRejected() { state.dlgEditEntry.visible = false }
 			}))
 		}
 
@@ -377,7 +484,7 @@ export function Home() {
 				currentPage: state.pagination.page,
 				maxPage: state.pagination.maxPage,
 				onNewClicked() { state.dlgEntryType.visible = true },
-				onEditClicked() { }, // TODO
+				onEditClicked() { state.dlgEditEntry.visible = true },
 				onDeleteClicked() { }, // TODO
 				onItemClicked(entry) { }, // TODO
 				onPageChanged(page) {
