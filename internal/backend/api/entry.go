@@ -209,3 +209,37 @@ func (h *Handler) UpdateEntry(w http.ResponseWriter, r *http.Request, ps httprou
 	err = encodeGzippedJSON(w, &entry)
 	checkError(err)
 }
+
+// DeleteEntries is handler for DELETE /api/entries
+func (h *Handler) DeleteEntries(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	// Make sure session still valid
+	h.auth.MustAuthenticateUser(r)
+
+	// Decode request
+	var ids []int
+	err := json.NewDecoder(r.Body).Decode(&ids)
+	checkError(err)
+
+	// Start transaction
+	// Make sure to rollback if panic ever happened
+	tx := h.db.MustBegin()
+
+	defer func() {
+		if r := recover(); r != nil {
+			tx.Rollback()
+			panic(r)
+		}
+	}()
+
+	// Delete from database
+	stmt, err := tx.Preparex(`DELETE FROM entry WHERE id = ?`)
+	checkError(err)
+
+	for _, id := range ids {
+		stmt.MustExec(id)
+	}
+
+	// Commit transaction
+	err = tx.Commit()
+	checkError(err)
+}

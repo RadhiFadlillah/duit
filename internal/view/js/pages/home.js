@@ -49,6 +49,7 @@ export function Home() {
 		dlgEntryType: { visible: false },
 		dlgNewEntry: { visible: false, loading: false, type: 0 },
 		dlgEditEntry: { visible: false, loading: false },
+		dlgDeleteEntry: { visible: false, loading: false },
 	}
 
 	// Local method
@@ -347,6 +348,76 @@ export function Home() {
 			})
 	}
 
+	function deleteEntries() {
+		state.loading = true
+		state.dlgDeleteEntry.loading = true
+		m.redraw()
+
+		let ids = state.selectedEntries.map(idx => {
+			return state.entries[idx].id
+		})
+
+		let options = {
+			method: "DELETE",
+			body: JSON.stringify(ids)
+		}
+
+		request("/api/entries", timeoutDuration, options)
+			.then(() => {
+				let sumDeleted = {}
+				state.selectedEntries
+					.sort((a, b) => b - a)
+					.forEach(idx => {
+						let entry = state.entries[idx],
+							amount = Big(entry.amount)
+
+						if (entry.type === 3) {
+							let sumAccount = sumDeleted[entry.accountId] || Big(0),
+								sumAffectedAccount = sumDeleted[entry.affectedAccountId] || Big(0)
+
+							sumAccount = sumAccount.minus(amount)
+							sumDeleted[entry.accountId] = sumAccount
+
+							sumAffectedAccount = sumAffectedAccount.plus(amount)
+							sumDeleted[entry.affectedAccountId] = sumAffectedAccount
+						} else {
+							let sumAccount = sumDeleted[entry.accountId] || Big(0)
+
+							if (entry.type === 1) sumAccount = sumAccount.plus(amount)
+							else sumAccount = sumAccount.minus(amount)
+
+							sumDeleted[entry.accountId] = sumAccount
+						}
+
+						state.entries.splice(idx, 1)
+					})
+				state.selectedEntries = []
+
+				for (const key in sumDeleted) {
+					let accountId = parseInt(key, 10) || 0,
+						idx = state.accounts.findIndex(account => account.id === accountId),
+						account = state.accounts[idx]
+
+					if (account != null) {
+						account.total = Big(account.total).minus(sumDeleted[accountId])
+						state.accounts[idx] = account
+					}
+				}
+
+				loadEntries()
+			})
+			.catch(err => {
+				state.dlgError.message = err.message
+				state.dlgError.visible = true
+			})
+			.finally(() => {
+				state.loading = false
+				state.dlgDeleteEntry.loading = false
+				state.dlgDeleteEntry.visible = false
+				m.redraw()
+			})
+	}
+
 	// Render view
 	function renderView(vnode) {
 		// Prepare dialogs
@@ -447,6 +518,18 @@ export function Home() {
 			}))
 		}
 
+		if (dialogs.length === 0 && state.dlgDeleteEntry.visible) {
+			dialogs.push(m(DialogConfirm, {
+				title: "Delete Entry",
+				message: `Yakin ingin menghapus ${state.selectedEntries.length} entry ?`,
+				acceptText: "Ya",
+				rejectText: "Tidak",
+				loading: state.dlgDeleteEntry.loading,
+				onAccepted() { deleteEntries() },
+				onRejected() { state.dlgDeleteEntry.visible = false }
+			}))
+		}
+
 		// Prepare loading cover
 		let covers = []
 
@@ -485,7 +568,7 @@ export function Home() {
 				maxPage: state.pagination.maxPage,
 				onNewClicked() { state.dlgEntryType.visible = true },
 				onEditClicked() { state.dlgEditEntry.visible = true },
-				onDeleteClicked() { }, // TODO
+				onDeleteClicked() { state.dlgDeleteEntry.visible = true },
 				onItemClicked(entry) { }, // TODO
 				onPageChanged(page) {
 					state.pagination.page = page
