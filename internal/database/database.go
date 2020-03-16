@@ -17,7 +17,7 @@ func Open(config model.Config) (db *sqlx.DB, err error) {
 	}
 
 	if config.DbName == "" {
-		config.DbName = "yla_server"
+		config.DbName = "duit"
 	}
 
 	// Connect to database
