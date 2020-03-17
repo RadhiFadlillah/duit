@@ -17,7 +17,6 @@ CREATE TABLE IF NOT EXISTS account (
 	id             INT UNSIGNED  NOT NULL AUTO_INCREMENT,
 	name           VARCHAR(100)  NOT NULL,
 	initial_amount DECIMAL(20,4) NOT NULL DEFAULT 0,
-	creation_date  DATE          NOT NULL,
 	PRIMARY KEY (id))
 	CHARACTER SET utf8mb4
 `
