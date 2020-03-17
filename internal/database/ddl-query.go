@@ -39,3 +39,34 @@ CREATE TABLE IF NOT EXISTS entry (
 	CONSTRAINT CHECK (type >= 1 AND type <= 3))
 	CHARACTER SET utf8mb4
 `
+
+const ddlCreateViewAccountTotal = `
+CREATE VIEW IF NOT EXISTS account_total AS 
+	WITH income AS (
+		SELECT account_id id, SUM(amount) amount FROM entry
+		WHERE type = 1
+		GROUP BY account_id),
+	expense AS (
+		SELECT account_id id, SUM(amount) amount FROM entry
+		WHERE type = 2
+		GROUP BY account_id),
+	moved AS (
+		SELECT account_id id, SUM(amount) amount FROM entry
+		WHERE type = 3
+		GROUP BY account_id),
+	received AS (
+		SELECT affected_account_id id, SUM(amount) amount FROM entry
+		WHERE type = 3
+		GROUP BY affected_account_id)
+	SELECT a.id, a.name, a.initial_amount,
+		a.initial_amount + 
+		IFNULL(i.amount, 0) - 
+		IFNULL(e.amount, 0) - 
+		IFNULL(m.amount, 0) + 
+		IFNULL(r.amount, 0) total
+	FROM account a
+	LEFT JOIN income i ON i.id = a.id
+	LEFT JOIN expense e ON e.id = a.id
+	LEFT JOIN moved m ON m.id = a.id
+	LEFT JOIN received r ON r.id = a.id
+`

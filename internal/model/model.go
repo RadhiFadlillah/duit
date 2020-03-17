@@ -30,7 +30,7 @@ type Account struct {
 	Name          string          `db:"name"           json:"name"`
 	InitialAmount decimal.Decimal `db:"initial_amount" json:"initialAmount"`
 
-	// Additional info fields
+	// Additional fields that used in view
 	Total decimal.Decimal `db:"total" json:"total"`
 }
 

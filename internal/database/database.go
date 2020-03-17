@@ -56,6 +56,9 @@ func Open(config model.Config) (db *sqlx.DB, err error) {
 	tx.MustExec(ddlCreateAccount)
 	tx.MustExec(ddlCreateEntry)
 
+	// Generate views
+	tx.MustExec(ddlCreateViewAccountTotal)
+
 	// Commit transaction
 	err = tx.Commit()
 	checkError(err)

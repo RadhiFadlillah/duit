@@ -8,35 +8,6 @@ import (
 	"github.com/julienschmidt/httprouter"
 )
 
-const sqlSelectAccount = `
-WITH income AS (
-	SELECT account_id id, SUM(amount) amount FROM entry
-	WHERE type = 1
-	GROUP BY account_id),
-expense AS (
-	SELECT account_id id, SUM(amount) amount FROM entry
-	WHERE type = 2
-	GROUP BY account_id),
-moved AS (
-	SELECT account_id id, SUM(amount) amount FROM entry
-	WHERE type = 3
-	GROUP BY account_id),
-received AS (
-	SELECT affected_account_id id, SUM(amount) amount FROM entry
-	WHERE type = 3
-	GROUP BY affected_account_id)
-SELECT a.id, a.name, a.initial_amount,
-	a.initial_amount + 
-	IFNULL(i.amount, 0) - 
-	IFNULL(e.amount, 0) - 
-	IFNULL(m.amount, 0) + 
-	IFNULL(r.amount, 0) total
-FROM account a
-LEFT JOIN income i ON i.id = a.id
-LEFT JOIN expense e ON e.id = a.id
-LEFT JOIN moved m ON m.id = a.id
-LEFT JOIN received r ON r.id = a.id`
-
 // SelectAccounts is handler for GET /api/accounts
 func (h *Handler) SelectAccounts(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	// Make sure session still valid
@@ -49,7 +20,10 @@ func (h *Handler) SelectAccounts(w http.ResponseWriter, r *http.Request, ps http
 	defer tx.Rollback()
 
 	// Prepare SQL statement
-	stmtSelectAccounts, err := tx.Preparex(sqlSelectAccount + ` ORDER BY a.name`)
+	stmtSelectAccounts, err := tx.Preparex(`
+		SELECT id, name, initial_amount, total
+		FROM account_total
+		ORDER BY name`)
 	checkError(err)
 
 	// Fetch from database
@@ -128,7 +102,11 @@ func (h *Handler) UpdateAccount(w http.ResponseWriter, r *http.Request, ps httpr
 		account.Name, account.InitialAmount, account.ID)
 
 	// Fetch the updated account
-	err = tx.Get(&account, sqlSelectAccount+` WHERE a.id = ?`, account.ID)
+	err = tx.Get(&account, `
+		SELECT id, name, initial_amount, total
+		FROM account_total
+		WHERE id = ?`,
+		account.ID)
 	checkError(err)
 
 	// Commit transaction
