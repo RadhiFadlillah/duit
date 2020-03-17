@@ -552,6 +552,8 @@ export function Home() {
 				let activeAccount = state.activeAccount || {}
 				if (account.id !== activeAccount.id) {
 					state.activeAccount = account
+					state.pagination.maxPage = 1
+					state.pagination.page = 1
 					loadEntries(account)
 				}
 			},
