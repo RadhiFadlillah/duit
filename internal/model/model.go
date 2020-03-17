@@ -29,6 +29,7 @@ type Account struct {
 	ID            int64           `db:"id"             json:"id"`
 	Name          string          `db:"name"           json:"name"`
 	InitialAmount decimal.Decimal `db:"initial_amount" json:"initialAmount"`
+	CreationDate  string          `db:"creation_date"  json:"creationDate"`
 
 	// Additional info fields
 	Total decimal.Decimal `db:"total" json:"total"`

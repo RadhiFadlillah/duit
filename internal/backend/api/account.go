@@ -3,6 +3,7 @@ package api
 import (
 	"encoding/json"
 	"net/http"
+	"time"
 
 	"github.com/RadhiFadlillah/duit/internal/model"
 	"github.com/julienschmidt/httprouter"
@@ -25,7 +26,7 @@ received AS (
 	SELECT affected_account_id id, SUM(amount) amount FROM entry
 	WHERE type = 3
 	GROUP BY affected_account_id)
-SELECT a.id, a.name, a.initial_amount,
+SELECT a.id, a.name, a.initial_amount, a.creation_date,
 	a.initial_amount + 
 	IFNULL(i.amount, 0) - 
 	IFNULL(e.amount, 0) - 
@@ -86,8 +87,12 @@ func (h *Handler) InsertAccount(w http.ResponseWriter, r *http.Request, ps httpr
 	}()
 
 	// Save to database
-	res := tx.MustExec(`INSERT INTO account (name, initial_amount)
-		VALUES (?, ?)`, account.Name, account.InitialAmount)
+	res := tx.MustExec(`INSERT INTO account 
+		(name, initial_amount, creation_date)
+		VALUES (?, ?, ?)`,
+		account.Name,
+		account.InitialAmount,
+		time.Now().Format("2006-01-02"))
 	account.ID, _ = res.LastInsertId()
 
 	// Commit transaction
