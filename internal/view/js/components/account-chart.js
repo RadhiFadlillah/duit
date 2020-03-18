@@ -26,6 +26,19 @@ export function AccountChart() {
 		return `hsl(${hue},100%,40%)`
 	}
 
+	function shortenAmount(val) {
+		const trillion = 1_000_000_000_000,
+			billion = 1_000_000_000,
+			million = 1_000_000,
+			thousand = 1_000
+
+		if (val >= trillion) return Math.round(val / trillion) + "T"
+		if (val >= billion) return Math.round(val / billion) + "B"
+		if (val >= million) return Math.round(val / million) + "M"
+		if (val >= thousand) return Math.round(val / thousand) + "K"
+		return val;
+	}
+
 	function renderChart(dom, opts) {
 		if (opts.accounts.length == 0) return
 		if (opts.series.length == 0) return
@@ -71,25 +84,20 @@ export function AccountChart() {
 				low: undefined,
 				high: undefined,
 				scaleMinSpace: 30,
-				labelInterpolationFnc(val) {
-					const trillion = 1_000_000_000_000,
-						billion = 1_000_000_000,
-						million = 1_000_000,
-						thousand = 1_000
-
-					if (val >= trillion) return Math.round(val / trillion) + "T"
-					if (val >= billion) return Math.round(val / billion) + "B"
-					if (val >= million) return Math.round(val / million) + "M"
-					if (val >= thousand) return Math.round(val / thousand) + "K"
-					return val;
-				}
+				labelInterpolationFnc: shortenAmount
 			},
 			axisX: {
 				labelOffset: {
 					x: -8,
 					y: 0
 				}
-			}
+			},
+			plugins: [
+				Chartist.plugins.ctPointLabels({
+					textAnchor: 'middle',
+					labelInterpolationFnc: shortenAmount
+				})
+			]
 		})
 
 		state.chart.on("draw", function (context) {
