@@ -1,5 +1,4 @@
 import {
-	Button,
 	LoadingCover,
 	AccountList,
 	EntryList,
@@ -17,14 +16,13 @@ import {
 	request,
 	cloneObject,
 	getDateParts,
-	mergeObject,
 } from "../libs/utils.min.js"
 
 import {
 	Big
 } from "../libs/big.min.js"
 
-export function Home() {
+export function HomePage() {
 	let state = {
 		loading: false,
 
@@ -541,7 +539,7 @@ export function Home() {
 		let homeContents = []
 
 		homeContents.push(m(AccountList, {
-			class: "home-account-list",
+			class: "home-page__account-list",
 			loading: state.accountsLoading,
 			accounts: state.accounts,
 			selection: state.selectedAccounts,
@@ -561,7 +559,7 @@ export function Home() {
 
 		if (state.activeAccount != null) {
 			homeContents.push(m(EntryList, {
-				class: "home-entry-list",
+				class: "home-page__entry-list",
 				loading: state.entriesLoading,
 				account: state.activeAccount,
 				entries: state.entries,
@@ -580,7 +578,7 @@ export function Home() {
 		}
 
 		// Render final view
-		return m(".home",
+		return m(".home-page",
 			...homeContents,
 			...dialogs,
 			...covers,

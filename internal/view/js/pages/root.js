@@ -3,7 +3,8 @@ import {
 } from "../components/_components.min.js";
 
 import {
-	Home
+	HomePage,
+	ChartPage,
 } from "./_pages.min.js"
 
 export function Root() {
@@ -23,16 +24,16 @@ export function Root() {
 		}]
 
 	function parseSubPage(subPage) {
-		let component = Home,
+		let component = HomePage,
 			sidebarIndex = 0
 
 		switch (subPage) {
 			case "home":
-				component = Home
+				component = HomePage
 				sidebarIndex = 0
 				break
 			case "chart":
-				component = Chart
+				component = ChartPage
 				sidebarIndex = 1
 				break
 			case "users":

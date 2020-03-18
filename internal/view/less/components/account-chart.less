@@ -1,0 +1,98 @@
+// out: ../../css/components/
+
+.account-chart {
+	display   : flex;
+	flex-flow : column nowrap;
+	overflow  : hidden;
+	background: var(--content-bg);
+	border    : 1px solid var(--border);
+}
+
+.account-chart__empty-message {
+	margin   : auto;
+	font-size: 0.9rem;
+	color    : var(--link-color);
+}
+
+.account-chart__loading-sign {
+	margin   : auto;
+	font-size: 4rem;
+	color    : var(--link-color);
+}
+
+// Header styles
+
+.account-chart__header {
+	padding        : 0.5rem 0.5rem 0;
+	display        : flex;
+	flex-flow      : row wrap;
+	align-items    : center;
+	justify-content: center;
+	border-bottom  : 1px solid var(--border);
+
+	>* {
+		margin-bottom: 0.5rem;
+
+		&:not(:last-child) {
+			margin-right: 1rem;
+		}
+	}
+}
+
+p.account-chart__legend {
+	display        : flex;
+	flex-flow      : row nowrap;
+	text-align     : center;
+	font-size      : 0.9rem;
+	color          : var(--color);
+	align-items    : center;
+	justify-content: center;
+}
+
+span.account-chart__legend__color {
+	display      : block;
+	height       : 1rem;
+	width        : 1rem;
+	margin-right : 0.3rem;
+	border-radius: 0.5rem;
+	flex-shrink  : 0;
+}
+
+// Content styles
+
+.account-chart__wrapper {
+	display  : flex;
+	flex-flow: row nowrap;
+	flex     : 1 0;
+	overflow : hidden;
+}
+
+.account-chart__content {
+	flex: 1 0;
+}
+
+// Footer styles
+
+.account-chart__footer {
+	padding        : 0 0.5rem;
+	height         : 2.5rem;
+	display        : flex;
+	flex-flow      : row nowrap;
+	flex-shrink    : 0;
+	align-items    : center;
+	justify-content: center;
+	border-top     : 1px solid var(--border);
+
+	>*:not(:last-child) {
+		margin-right: 0.5rem;
+	}
+}
+
+.account-chart__footer__button {
+	padding: 0;
+}
+
+.account-chart__footer__year {
+	font-size: 0.9rem;
+	color    : var(--link-color);
+}

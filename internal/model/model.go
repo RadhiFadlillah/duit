@@ -48,3 +48,10 @@ type Entry struct {
 	Account         string      `db:"account"          json:"account"`
 	AffectedAccount null.String `db:"affected_account" json:"affectedAccount"`
 }
+
+// ChartSeries is container for chart series
+type ChartSeries struct {
+	AccountID int64           `db:"account_id" json:"accountId"`
+	Month     int             `db:"month"      json:"month"`
+	Amount    decimal.Decimal `db:"amount"     json:"amount"`
+}
