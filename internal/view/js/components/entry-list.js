@@ -162,13 +162,14 @@ export function EntryList() {
 							tmpDescription = ""
 
 						if (accountIsReceiver) {
+							className = "entry--income"
 							tmpDescription = `Masuk dari ${entry.account}`
 						} else {
+							className = "entry--expense"
 							tmpDescription = `Pindah ke ${entry.affectedAccount}`
 							amount = amount.times(-1)
 						}
 
-						className = "entry--transfer"
 						description = description || tmpDescription
 				}
 
@@ -187,9 +188,12 @@ export function EntryList() {
 				}
 
 				// Render the entry
+				let descriptionClass
+				if (entry.type === 3) descriptionClass = "entry--transfer"
+
 				contents.push(m(".entry",
 					m("input[type=checkbox].entry__check", checkAttrs),
-					m("p.entry__description", description),
+					m("p.entry__description", { class: descriptionClass }, description),
 					m("p.entry__amount", { class: className }, formatNumber(amount)),
 				))
 			})
