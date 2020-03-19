@@ -146,6 +146,7 @@ export function HomePage() {
 		request("/api/account", timeoutDuration, options)
 			.then(json => {
 				state.accounts.splice(idx, 1, json)
+				state.accounts.sort(sortAccounts)
 			})
 			.catch(err => {
 				state.dlgError.message = err.message

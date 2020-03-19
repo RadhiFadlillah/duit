@@ -48,6 +48,11 @@ func (sm *SessionManager) RegisterUser(user model.User, duration time.Duration) 
 		duration = sm.defaultExpiration
 	}
 
+	// If user is empty, make its duration short
+	if user.ID == 0 {
+		duration = 20 * time.Minute
+	}
+
 	// Create random session
 	session, err := sm.createSession()
 	if err != nil {

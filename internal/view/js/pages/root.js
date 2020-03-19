@@ -5,6 +5,7 @@ import {
 import {
 	HomePage,
 	ChartPage,
+	UserPage,
 } from "./_pages.min.js"
 
 export function Root() {
@@ -37,7 +38,7 @@ export function Root() {
 				sidebarIndex = 1
 				break
 			case "users":
-				component = Users
+				component = UserPage
 				sidebarIndex = 2
 				break
 		}

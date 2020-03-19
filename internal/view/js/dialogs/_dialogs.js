@@ -1,6 +1,8 @@
+export { DialogAlert } from "./alert.min.js"
 export { DialogError } from "./error.min.js"
 export { DialogConfirm } from "./confirm.min.js"
 export { DialogForm } from "./form.min.js"
+export { DialogFormUser } from "./form-user.min.js"
 export { DialogFormAccount } from "./form-account.min.js"
 export { DialogFormEntry } from "./form-entry.min.js"
 export { DialogEntryType } from "./entry-type.min.js"

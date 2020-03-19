@@ -1,8 +1,6 @@
 package model
 
 import (
-	"encoding/json"
-
 	"github.com/shopspring/decimal"
 	"gopkg.in/guregu/null.v3"
 )
@@ -17,11 +15,10 @@ type Config struct {
 
 // User is container for user's data
 type User struct {
-	ID         int64           `db:"id"          json:"id"`
-	Username   string          `db:"username"    json:"username"`
-	Name       string          `db:"name"        json:"name"`
-	Password   string          `db:"password"    json:"password,omitempty"`
-	Permission json.RawMessage `db:"permission"  json:"permission"`
+	ID       int64  `db:"id"          json:"id"`
+	Username string `db:"username"    json:"username"`
+	Name     string `db:"name"        json:"name"`
+	Password string `db:"password"    json:"password,omitempty"`
 }
 
 // Account is container for financial account

@@ -35,7 +35,7 @@ function loginScreen() {
 				let session = json.session,
 					user = json.user || null
 
-				Cookies.set("session-server", session)
+				Cookies.set("session-duit", session)
 				localStorage.setItem("user", JSON.stringify(user))
 				window.location.href = "/"
 			})

@@ -25,7 +25,7 @@ export function DialogError() {
 					loading: loading,
 					onclick() {
 						if (message.startsWith("session has been expired")) {
-							Cookies.remove("session-server")
+							Cookies.remove("session-duit")
 							localStorage.removeItem("account")
 							window.location.href = "/login"
 							return

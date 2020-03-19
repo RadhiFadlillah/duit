@@ -70,19 +70,22 @@ export function ChartPage() {
 			covers.push(m(LoadingCover))
 		}
 
+		// Prepare account chart
+		let accountChart = m(AccountChart, {
+			class: "chart-page__main-chart",
+			loading: state.loading,
+			year: state.chart.year,
+			accounts: state.chart.accounts,
+			series: state.chart.series,
+			onYearChanged(year) {
+				state.chart.year = year
+				loadChartData()
+			}
+		})
+
 		// Render final view
 		return m(".chart-page",
-			m(AccountChart, {
-				class: "chart-page__main-chart",
-				loading: state.loading,
-				year: state.chart.year,
-				accounts: state.chart.accounts,
-				series: state.chart.series,
-				onYearChanged(year) {
-					state.chart.year = year
-					loadChartData()
-				}
-			}),
+			accountChart,
 			...dialogs,
 			...covers,
 		)

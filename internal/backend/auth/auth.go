@@ -53,7 +53,7 @@ func (auth *Authenticator) Login(username, password string) (string, model.User,
 	}
 
 	stmtGetUser, err := tx.Preparex(`
-		SELECT id, username, name, password, permission
+		SELECT id, username, name, password
 		FROM user WHERE username = ?`)
 	if err != nil {
 		return "", emptyUser, fmt.Errorf("failed to prepare query: %w", err)
@@ -157,9 +157,9 @@ func (auth *Authenticator) MustAuthenticateUser(r *http.Request) {
 // session ID from http request.
 func (auth *Authenticator) GetSessionFromRequest(r *http.Request) string {
 	// Get session from header and cookie
-	headerSession := r.Header.Get("X-Session-Server")
+	headerSession := r.Header.Get("X-Session-Duit")
 	cookieSession := func() string {
-		cookie, err := r.Cookie("session-server")
+		cookie, err := r.Cookie("session-duit")
 		if err != nil {
 			return ""
 		}

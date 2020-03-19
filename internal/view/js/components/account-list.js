@@ -99,7 +99,7 @@ export function AccountList() {
 		if (selection.length === 1) headerContents.push(
 			m(Button, mergeObject(headerButtonAttrs, {
 				icon: "fa-pen",
-				caption: "Edit entry",
+				caption: "Edit akun",
 				onclick() { onEditClicked() }
 			}))
 		)
@@ -107,7 +107,7 @@ export function AccountList() {
 		if (selection.length >= 1) headerContents.push(
 			m(Button, mergeObject(headerButtonAttrs, {
 				icon: "fa-trash-alt",
-				caption: "Delete entry",
+				caption: "Delete akun",
 				onclick() { onDeleteClicked() }
 			}))
 		)

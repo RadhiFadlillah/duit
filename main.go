@@ -4,6 +4,8 @@ package main
 
 import (
 	"fmt"
+	"math/rand"
+	"time"
 
 	"github.com/BurntSushi/toml"
 	"github.com/RadhiFadlillah/duit/internal/backend"
@@ -20,6 +22,9 @@ func main() {
 		FullTimestamp:   true,
 		TimestampFormat: "2006-01-02 15:04:05",
 	})
+
+	// Seed the randomizer
+	rand.Seed(time.Now().UTC().UnixNano())
 
 	// Prepare cmd
 	cmd := &cobra.Command{
