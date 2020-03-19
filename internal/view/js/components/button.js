@@ -22,6 +22,7 @@ export function Button() {
 	function renderView(vnode) {
 		// Parse attributes and set default value
 		let icon = vnode.attrs.icon,
+			href = vnode.attrs.href,
 			caption = vnode.attrs.caption,
 			enabled = vnode.attrs.enabled,
 			iconOnly = vnode.attrs.iconOnly,
@@ -31,6 +32,7 @@ export function Button() {
 			tooltipPosition = vnode.attrs.tooltipPosition
 
 		if (typeof icon != "string") icon = ""
+		if (typeof href != "string") href = ""
 		if (typeof caption != "string") caption = ""
 		if (typeof enabled != "boolean") enabled = true
 		if (typeof iconOnly != "boolean") iconOnly = false
@@ -60,6 +62,15 @@ export function Button() {
 				text: caption,
 				position: tooltipPosition,
 			}))
+		}
+
+		if (href !== "") {
+			return m("a.button", {
+				class: className,
+				href: href,
+				onmouseenter() { tooltipVisible = true },
+				onmouseleave() { tooltipVisible = false },
+			}, childNodes)
 		}
 
 		return m("button.button", {

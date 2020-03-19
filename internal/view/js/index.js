@@ -5,6 +5,6 @@ import {
 export function startApp() {
 	m.route(document.body, "/", {
 		"/": Root,
-		"/:subpage": Root,
+		"/:page": Root,
 	})
 }
