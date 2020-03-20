@@ -43,7 +43,7 @@ export function Root() {
 		request("/api/logout", timeoutDuration, { method: "POST" })
 			.then(() => {
 				Cookies.remove("session-duit")
-				localStorage.removeItem("user")
+				localStorage.removeItem("duit-user")
 				window.location.href = "/login"
 			})
 			.catch(err => {
@@ -83,7 +83,7 @@ export function Root() {
 		request("/api/user/password", timeoutDuration, options)
 			.then(() => {
 				Cookies.remove("session-duit")
-				localStorage.removeItem("user")
+				localStorage.removeItem("duit-user")
 				window.location.href = "/login"
 			})
 			.catch(err => {

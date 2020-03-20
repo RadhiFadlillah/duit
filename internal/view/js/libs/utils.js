@@ -48,7 +48,7 @@ export function cloneObject(src) {
 }
 
 export function getActiveUser() {
-	let localUser = localStorage.getItem("user") || "null"
+	let localUser = localStorage.getItem("duit-user") || "null"
 	return JSON.parse(localUser)
 }
 
