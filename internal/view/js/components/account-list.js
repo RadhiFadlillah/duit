@@ -9,8 +9,12 @@ import {
 
 import {
 	mergeObject,
-	formatNumber
 } from "../libs/utils.min.js"
+
+import {
+	i18n,
+	formatNumber
+} from "../i18n/i18n.min.js"
 
 export function AccountList() {
 	let lastSelectedRow = 0
@@ -80,7 +84,7 @@ export function AccountList() {
 		}, Big(0))
 
 		// Render header
-		let title = "Daftar Akun"
+		let title = i18n("Account List")
 		if (accounts.length > 0) title = `Total ${formatNumber(sumAccount)}`
 
 		let headerContents = [m("p.account-list__header__title", title)],
@@ -99,7 +103,7 @@ export function AccountList() {
 		if (selection.length === 1) headerContents.push(
 			m(Button, mergeObject(headerButtonAttrs, {
 				icon: "fa-pen",
-				caption: "Edit akun",
+				caption: i18n("Edit account"),
 				onclick() { onEditClicked() }
 			}))
 		)
@@ -107,14 +111,14 @@ export function AccountList() {
 		if (selection.length >= 1) headerContents.push(
 			m(Button, mergeObject(headerButtonAttrs, {
 				icon: "fa-trash-alt",
-				caption: "Delete akun",
+				caption: i18n("Delete account"),
 				onclick() { onDeleteClicked() }
 			}))
 		)
 
 		headerContents.push(m(Button, mergeObject(headerButtonAttrs, {
 			icon: "fa-plus-circle",
-			caption: "Akun baru",
+			caption: i18n("New account"),
 			onclick() { onNewClicked() }
 		})))
 
@@ -126,7 +130,7 @@ export function AccountList() {
 		if (loading) {
 			contents.push(m(LoadingSign, { class: "account-list__loading-sign" }))
 		} else if (accounts.length === 0) {
-			contents.push(m("p.account-list__empty-message", "Belum ada akun terdaftar"))
+			contents.push(m("p.account-list__empty-message", i18n("No accounts registered")))
 		} else contents = accounts.map((acc, idx) => {
 			let checkAttrs = {
 				checked: selection.indexOf(idx) !== -1,

@@ -2,6 +2,10 @@ import {
 	DialogForm
 } from "./form.min.js"
 
+import {
+	i18n
+} from "../i18n/i18n.min.js"
+
 export function DialogFormAccount() {
 	function renderView(vnode) {
 		// Parse attributes and set default value
@@ -20,11 +24,11 @@ export function DialogFormAccount() {
 		// Create form fields
 		let formFields = [{
 			name: "name",
-			label: "Nama",
+			label: i18n("Name"),
 			required: true
 		}, {
 			name: "initialAmount",
-			label: "Jumlah awal",
+			label: i18n("Initial amount"),
 			type: "float",
 			min: 0,
 		}]

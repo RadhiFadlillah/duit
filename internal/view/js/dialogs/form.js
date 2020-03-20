@@ -7,6 +7,10 @@ import {
 	cloneObject
 } from "../libs/utils.min.js"
 
+import {
+	i18n,
+} from "../i18n/i18n.min.js"
+
 export function DialogForm() {
 	let formData = {}
 
@@ -243,7 +247,7 @@ export function DialogForm() {
 		if (!loading) {
 			buttons.push(m(Button, {
 				class: "dialog__button",
-				caption: "Cancel",
+				caption: i18n("Cancel"),
 				onclick() { onRejected() }
 			}))
 		}

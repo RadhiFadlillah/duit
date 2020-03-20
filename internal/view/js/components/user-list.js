@@ -7,6 +7,10 @@ import {
 	mergeObject,
 } from "../libs/utils.min.js"
 
+import {
+	i18n
+} from "../i18n/i18n.min.js"
+
 export function UserList() {
 	let lastSelectedRow = 0
 
@@ -70,7 +74,7 @@ export function UserList() {
 		if (typeof onDeleteClicked != "function") onDeleteClicked = () => { }
 
 		// Render header
-		let title = "Daftar User",
+		let title = i18n("User List"),
 			headerContents = [m("p.user-list__header__title", title)],
 			headerButtonAttrs = {
 				iconOnly: true,
@@ -87,7 +91,7 @@ export function UserList() {
 		if (selection.length === 1) headerContents.push(
 			m(Button, mergeObject(headerButtonAttrs, {
 				icon: "fa-pen",
-				caption: "Edit user",
+				caption: i18n("Edit user"),
 				onclick() { onEditClicked() }
 			}))
 		)
@@ -95,7 +99,7 @@ export function UserList() {
 		if (selection.length === 1) headerContents.push(
 			m(Button, mergeObject(headerButtonAttrs, {
 				icon: "fa-key",
-				caption: "Reset password user",
+				caption: i18n("Reset user's password"),
 				onclick() { onResetClicked() }
 			}))
 		)
@@ -103,14 +107,14 @@ export function UserList() {
 		if (selection.length >= 1) headerContents.push(
 			m(Button, mergeObject(headerButtonAttrs, {
 				icon: "fa-trash-alt",
-				caption: "Delete user",
+				caption: i18n("Delete user"),
 				onclick() { onDeleteClicked() }
 			}))
 		)
 
 		headerContents.push(m(Button, mergeObject(headerButtonAttrs, {
 			icon: "fa-plus-circle",
-			caption: "User baru",
+			caption: i18n("New user"),
 			onclick() { onNewClicked() }
 		})))
 
@@ -122,7 +126,7 @@ export function UserList() {
 		if (loading) {
 			contents.push(m(LoadingSign, { class: "user-list__loading-sign" }))
 		} else if (users.length === 0) {
-			contents.push(m("p.user-list__empty-message", "Belum ada user terdaftar"))
+			contents.push(m("p.user-list__empty-message", i18n("No users registered")))
 		} else contents = users.map((user, idx) => {
 			let checkAttrs = {
 				checked: selection.indexOf(idx) !== -1,

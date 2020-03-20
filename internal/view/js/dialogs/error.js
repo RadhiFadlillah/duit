@@ -3,6 +3,10 @@ import {
 	Dialog
 } from "../components/_components.min.js"
 
+import {
+	i18n
+} from "../i18n/i18n.min.js"
+
 import Cookies from '../libs/js-cookie.min.js'
 
 export function DialogError() {
@@ -21,7 +25,7 @@ export function DialogError() {
 			buttons: [
 				m(Button, {
 					class: "dialog__button",
-					caption: "OK",
+					caption: i18n("OK"),
 					loading: loading,
 					onclick() {
 						if (message.startsWith("session has been expired")) {

@@ -15,6 +15,10 @@ import {
 	cloneObject,
 } from "../libs/utils.min.js"
 
+import {
+	i18n
+} from "../i18n/i18n.min.js"
+
 export function UserPage() {
 	let state = {
 		loading: false,
@@ -82,7 +86,10 @@ export function UserPage() {
 				state.users.push(user)
 				state.users.sort(sortUsers)
 
-				state.dlgNewResult.message = `User tersimpan dengan password "${user.password}".`
+				let message = i18n("User saved with password $password")
+					.replace("$password", user.password)
+
+				state.dlgNewResult.message = message
 				state.dlgNewResult.visible = true
 			})
 			.catch(err => {
@@ -177,7 +184,7 @@ export function UserPage() {
 
 		request("/api/user/password/reset", timeoutDuration, options)
 			.then(json => {
-				state.dlgResetResult.message = `Password baru: "${json.password}".`
+				state.dlgResetResult.message = i18n("New password: $password").replace("$password", json.password)
 				state.dlgResetResult.visible = true
 			})
 			.catch(err => {
@@ -193,7 +200,7 @@ export function UserPage() {
 	}
 
 	// Render view
-	function renderView(vnode) {
+	function renderView() {
 		// Prepare dialogs
 		let dialogs = []
 
@@ -206,7 +213,7 @@ export function UserPage() {
 
 		if (dialogs.length === 0 && state.dlgNew.visible) {
 			dialogs.push(m(DialogFormUser, {
-				title: "User Baru",
+				title: i18n("New User"),
 				loading: state.dlgNew.loading,
 				onAccepted(data) { saveNewUser(data) },
 				onRejected() { state.dlgNew.visible = false }
@@ -215,8 +222,8 @@ export function UserPage() {
 
 		if (dialogs.length === 0 && state.dlgNewResult.visible) {
 			dialogs.push(m(DialogAlert, {
-				title: "User Baru",
-				btnText: "OK",
+				title: i18n("New User"),
+				btnText: i18n("OK"),
 				message: state.dlgNewResult.message,
 				onAccepted() { state.dlgNewResult.visible = false }
 			}))
@@ -228,7 +235,7 @@ export function UserPage() {
 				defaultValue = cloneObject(user)
 
 			dialogs.push(m(DialogFormUser, {
-				title: "Edit User",
+				title: i18n("Edit User"),
 				loading: state.dlgEdit.loading,
 				defaultValue: defaultValue,
 				onAccepted(data) { updateUser(data) },
@@ -237,11 +244,14 @@ export function UserPage() {
 		}
 
 		if (dialogs.length === 0 && state.dlgDelete.visible) {
+			let message = i18n("Permanently delete $n users ?")
+				.replace("$n", state.selectedUsers.length)
+
 			dialogs.push(m(DialogConfirm, {
-				title: "Delete User",
-				message: `Yakin ingin menghapus ${state.selectedUsers.length} user ?`,
-				acceptText: "Ya",
-				rejectText: "Tidak",
+				title: i18n("Delete User"),
+				message: message,
+				acceptText: i18n("Yes"),
+				rejectText: i18n("No"),
 				loading: state.dlgDelete.loading,
 				onAccepted() { deleteUsers() },
 				onRejected() { state.dlgDelete.visible = false }
@@ -250,13 +260,14 @@ export function UserPage() {
 
 		if (dialogs.length === 0 && state.dlgReset.visible) {
 			let idx = state.selectedUsers[0],
-				user = state.users[idx]
+				user = state.users[idx],
+				message = i18n("Reset password for $name ?").replace("$name", user.name)
 
 			dialogs.push(m(DialogConfirm, {
-				title: "Reset Password",
-				message: `Yakin ingin mereset password user ${user.name} ?`,
-				acceptText: "Ya",
-				rejectText: "Tidak",
+				title: i18n("Reset Password"),
+				message: message,
+				acceptText: i18n("Yes"),
+				rejectText: i18n("No"),
 				loading: state.dlgReset.loading,
 				onAccepted() { resetUserPassword() },
 				onRejected() { state.dlgReset.visible = false }
@@ -265,8 +276,8 @@ export function UserPage() {
 
 		if (dialogs.length === 0 && state.dlgResetResult.visible) {
 			dialogs.push(m(DialogAlert, {
-				title: "Reset Password",
-				btnText: "OK",
+				title: i18n("Reset Password"),
+				btnText: i18n("OK"),
 				message: state.dlgResetResult.message,
 				onAccepted() { state.dlgResetResult.visible = false }
 			}))

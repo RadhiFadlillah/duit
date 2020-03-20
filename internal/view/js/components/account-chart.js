@@ -4,13 +4,12 @@ import {
 } from "./_components.min.js";
 
 import {
-	Big
-} from "../libs/big.min.js"
+	mergeObject,
+} from "../libs/utils.min.js"
 
 import {
-	mergeObject,
-	formatNumber
-} from "../libs/utils.min.js"
+	i18n
+} from "../i18n/i18n.min.js"
 
 export function AccountChart() {
 	let state = {
@@ -54,8 +53,9 @@ export function AccountChart() {
 
 		// Create labels
 		let labels = [
-			"Jan", "Feb", "Mar", "Apr", "May", "Jun",
-			"Jul", "Aug", "Sep", "Okt", "Nov", "Dec",
+			i18n("Jan"), i18n("Feb"), i18n("Mar"), i18n("Apr"),
+			i18n("May"), i18n("Jun"), i18n("Jul"), i18n("Aug"),
+			i18n("Sep"), i18n("Oct"), i18n("Nov"), i18n("Dec"),
 		]
 
 		// Normalize series
@@ -94,7 +94,7 @@ export function AccountChart() {
 			},
 			plugins: [
 				Chartist.plugins.ctPointLabels({
-					textAnchor: 'middle',
+					textAnchor: "middle",
 					labelInterpolationFnc: shortenAmount
 				})
 			]
@@ -142,7 +142,7 @@ export function AccountChart() {
 		if (loading) {
 			contents.push(m(LoadingSign, { class: "account-chart__loading-sign" }))
 		} else if (isEmpty) {
-			contents.push(m("p.account-chart__empty-message", "Tidak ada data yang terdaftar"))
+			contents.push(m("p.account-chart__empty-message", i18n("No chart data available")))
 		} else {
 			// Create header
 			contents.push(m(".account-chart__header",
@@ -170,14 +170,14 @@ export function AccountChart() {
 			contents.push(m(".account-chart__footer",
 				m(Button, mergeObject(attrs, {
 					icon: "fa-angle-left",
-					caption: "Tahun lalu",
+					caption: i18n("Last year"),
 					enabled: !state.loading,
 					onclick() { onYearChanged(year - 1) }
 				})),
 				m("p.account-chart__footer__year", `${year}`),
 				m(Button, mergeObject(attrs, {
 					icon: "fa-angle-right",
-					caption: "Tahun depan",
+					caption: i18n("Next year"),
 					enabled: !state.loading && year < maxYear,
 					onclick() { onYearChanged(year + 1) }
 				})),

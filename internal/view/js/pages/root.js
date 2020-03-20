@@ -6,6 +6,7 @@ import {
 import {
 	DialogError,
 	DialogConfirm,
+	DialogLanguage,
 	DialogFormPassword
 } from "../dialogs/_dialogs.min.js"
 
@@ -20,6 +21,11 @@ import {
 	getActiveUser
 } from "../libs/utils.min.js";
 
+import {
+	i18n,
+	setLanguage,
+} from "../i18n/i18n.min.js"
+
 import Cookies from '../libs/js-cookie.min.js'
 
 export function Root() {
@@ -27,9 +33,10 @@ export function Root() {
 		user: null,
 		loading: false,
 
-		dlgLogout: { visible: false, loading: false },
-		dlgPassword: { visible: false, loading: false },
 		dlgError: { visible: false, message: "" },
+		dlgLogout: { visible: false, loading: false },
+		dlgLanguage: { visible: false, loading: false },
+		dlgPassword: { visible: false, loading: false },
 	}
 
 	// API function
@@ -61,7 +68,7 @@ export function Root() {
 		// Make sure new password is correct
 		if (data.newPassword !== data.repeatPassword) {
 			state.dlgPassword.visible = false
-			state.dlgError.message = "password baru tidak cocok"
+			state.dlgError.message = i18n("new password doesn't match")
 			state.dlgError.visible = true
 			return
 		}
@@ -127,19 +134,31 @@ export function Root() {
 
 		if (dialogs.length === 0 && state.dlgLogout.visible) {
 			dialogs.push(m(DialogConfirm, {
-				title: "Logout",
-				message: "Yakin ingin keluar dari aplikasi ?",
-				acceptText: "Ya",
-				rejectText: "Tidak",
+				title: i18n("Logout"),
+				message: i18n("Log out from the application ?"),
+				acceptText: i18n("Yes"),
+				rejectText: i18n("No"),
 				loading: state.dlgLogout.loading,
 				onAccepted() { logout() },
 				onRejected() { state.dlgLogout.visible = false }
 			}))
 		}
 
+		if (dialogs.length === 0 && state.dlgLanguage.visible) {
+			dialogs.push(m(DialogLanguage, {
+				title: i18n("Change Language"),
+				loading: state.dlgLanguage.loading,
+				onRejected() { state.dlgLanguage.visible = false },
+				onAccepted(data) {
+					setLanguage(data.language)
+					location.reload(false)
+				},
+			}))
+		}
+
 		if (dialogs.length === 0 && state.dlgPassword.visible) {
 			dialogs.push(m(DialogFormPassword, {
-				title: "Ganti Password",
+				title: i18n("Change Password"),
 				loading: state.dlgPassword.loading,
 				onAccepted(data) { changePassword(data) },
 				onRejected() { state.dlgPassword.visible = false },
@@ -181,32 +200,37 @@ export function Root() {
 		let sidebarButtons = [
 			m(Button, sidebarAttrs("home", {
 				icon: "fa-home",
-				caption: "Home",
+				caption: i18n("Home"),
 				href: "#!"
 			})),
 			m(Button, sidebarAttrs("chart", {
 				icon: "fa-chart-line",
-				caption: "Grafik keuangan",
+				caption: i18n("Money chart"),
 				href: "#!/chart"
 			})),
 			m(Button, sidebarAttrs("users", {
 				icon: "fa-user-cog",
-				caption: "Kelola user",
+				caption: i18n("User management"),
 				href: "#!/users"
 			})),
 			m(".sidebar__spacer"),
 			m(Button, sidebarAttrs(null, {
+				icon: "fa-flag",
+				caption: i18n("Change language"),
+				onclick() { state.dlgLanguage.visible = true }
+			})),
+			m(Button, sidebarAttrs(null, {
 				icon: "fa-sign-out-alt",
-				caption: "Logout",
+				caption: i18n("Logout"),
 				onclick() { state.dlgLogout.visible = true }
 			})),
 		]
 
 		if (state.user != null) {
-			sidebarButtons.splice(4, 0,
+			sidebarButtons.splice(5, 0,
 				m(Button, sidebarAttrs(null, {
 					icon: "fa-key",
-					caption: "Ganti password",
+					caption: i18n("Change password"),
 					onclick() { state.dlgPassword.visible = true }
 				}))
 			)

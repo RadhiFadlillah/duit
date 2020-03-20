@@ -9,9 +9,13 @@ import {
 
 import {
 	mergeObject,
-	formatDate,
-	formatNumber,
 } from "../libs/utils.min.js"
+
+import {
+	i18n,
+	formatDate,
+	formatNumber
+} from "../i18n/i18n.min.js"
 
 export function EntryList() {
 	let lastSelectedRow = 0
@@ -84,11 +88,11 @@ export function EntryList() {
 		if (typeof onPageChanged != "function") onPageChanged = () => { }
 
 		// Render header
-		let title = "Daftar Entry"
+		let title = i18n("Entry List")
 		if (account != null) {
 			let name = account.name || "",
 				total = account.total || "0"
-			title = `${name}, ${formatNumber(total)}`
+			title = `${name} ${formatNumber(total)}`
 		}
 
 		let headerContents = [m("p.entry-list__header__title", title)],
@@ -107,7 +111,7 @@ export function EntryList() {
 		if (selection.length === 1) headerContents.push(
 			m(Button, mergeObject(headerButtonAttrs, {
 				icon: "fa-pen",
-				caption: "Edit entry",
+				caption: i18n("Edit entry"),
 				onclick() { onEditClicked() }
 			}))
 		)
@@ -115,14 +119,14 @@ export function EntryList() {
 		if (selection.length >= 1) headerContents.push(
 			m(Button, mergeObject(headerButtonAttrs, {
 				icon: "fa-trash-alt",
-				caption: "Delete entry",
+				caption: i18n("Delete entry"),
 				onclick() { onDeleteClicked() }
 			}))
 		)
 
 		headerContents.push(m(Button, mergeObject(headerButtonAttrs, {
 			icon: "fa-plus-circle",
-			caption: "Entry baru",
+			caption: i18n("New entry"),
 			onclick() { onNewClicked() }
 		})))
 
@@ -134,7 +138,7 @@ export function EntryList() {
 		if (loading) {
 			contents.push(m(LoadingSign, { class: "entry-list__loading-sign" }))
 		} else if (entries.length === 0) {
-			contents.push(m("p.entry-list__empty-message", "Belum ada entry terdaftar"))
+			contents.push(m("p.entry-list__empty-message", i18n("No entries registered")))
 		} else {
 			entries.forEach((entry, idx) => {
 				// If this is a new date, put it into the list
@@ -163,10 +167,10 @@ export function EntryList() {
 
 						if (accountIsReceiver) {
 							className = "entry--income"
-							tmpDescription = `Masuk dari ${entry.account}`
+							tmpDescription = i18n("Received from $name").replace("$name", entry.account)
 						} else {
 							className = "entry--expense"
-							tmpDescription = `Pindah ke ${entry.affectedAccount}`
+							tmpDescription = i18n("Transferred to $name").replace("$name", entry.account)
 							amount = amount.times(-1)
 						}
 
@@ -219,26 +223,26 @@ export function EntryList() {
 			contents.push(m(".entry-list__footer",
 				m(Button, mergeObject(attrs, {
 					icon: "fa-angle-double-left",
-					caption: "Halaman pertama",
+					caption: i18n("First page"),
 					enabled: paginationEnabled.first,
 					onclick() { onPageChanged(1) }
 				})),
 				m(Button, mergeObject(attrs, {
 					icon: "fa-angle-left",
-					caption: "Halaman sebelumnya",
+					caption: i18n("Previous page"),
 					enabled: paginationEnabled.prev,
 					onclick() { onPageChanged(currentPage - 1) }
 				})),
 				m("p.entry-list__footer__page", `${currentPage} / ${maxPage}`),
 				m(Button, mergeObject(attrs, {
 					icon: "fa-angle-right",
-					caption: "Halaman selanjutnya",
+					caption: i18n("Next page"),
 					enabled: paginationEnabled.next,
 					onclick() { onPageChanged(currentPage + 1) }
 				})),
 				m(Button, mergeObject(attrs, {
 					icon: "fa-angle-double-right",
-					caption: "Halaman terakhir",
+					caption: i18n("Last page"),
 					enabled: paginationEnabled.last,
 					onclick() { onPageChanged(maxPage) }
 				}))

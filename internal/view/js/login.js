@@ -7,6 +7,10 @@ import {
 	request
 } from "./libs/utils.min.js"
 
+import {
+	i18n
+} from "./i18n/i18n.min.js"
+
 import Cookies from './libs/js-cookie.min.js'
 
 function loginScreen() {
@@ -67,17 +71,17 @@ function loginScreen() {
 				}),
 				m("input[type=text].login__input", {
 					value: state.username,
-					placeholder: "Username",
+					placeholder: i18n("Username"),
 					oninput(e) { state.username = e.target.value }
 				}),
 				m("input[type=password].login__input", {
 					value: state.password,
-					placeholder: "Password",
+					placeholder: i18n("Password"),
 					oninput(e) { state.password = e.target.value }
 				}),
 				m(Button, {
 					class: "login__button",
-					caption: "Login",
+					caption: i18n("Login"),
 					loading: state.loading,
 					onclick() { login() }
 				})

@@ -15,8 +15,11 @@ import {
 import {
 	request,
 	cloneObject,
-	getDateParts,
 } from "../libs/utils.min.js"
+
+import {
+	i18n
+} from "../i18n/i18n.min.js"
 
 import {
 	Big
@@ -58,6 +61,16 @@ export function HomePage() {
 		if (nameA < nameB) return -1
 		if (nameA > nameB) return 1
 		return 0
+	}
+
+	function getDateParts(str) {
+		let parts = str.split("-")
+
+		return {
+			year: parseInt(parts[0], 10) || 1,
+			month: parseInt(parts[1], 10) || 1,
+			day: parseInt(parts[2], 10) || 1,
+		}
 	}
 
 	function sortEntries(a, b) {
@@ -431,7 +444,7 @@ export function HomePage() {
 
 		if (dialogs.length === 0 && state.dlgNewAccount.visible) {
 			dialogs.push(m(DialogFormAccount, {
-				title: "Akun Baru",
+				title: i18n("New Account"),
 				loading: state.dlgNewAccount.loading,
 				onAccepted(data) { saveNewAccount(data) },
 				onRejected() { state.dlgNewAccount.visible = false }
@@ -444,7 +457,7 @@ export function HomePage() {
 				defaultValue = cloneObject(account)
 
 			dialogs.push(m(DialogFormAccount, {
-				title: "Edit Akun",
+				title: i18n("Edit Account"),
 				loading: state.dlgEditAccount.loading,
 				defaultValue: defaultValue,
 				onAccepted(data) { updateAccount(data) },
@@ -453,11 +466,14 @@ export function HomePage() {
 		}
 
 		if (dialogs.length === 0 && state.dlgDeleteAccount.visible) {
+			let message = i18n("Permanently delete $n accounts ?")
+				.replace("$n", state.selectedAccounts.length)
+
 			dialogs.push(m(DialogConfirm, {
-				title: "Delete Akun",
-				message: `Yakin ingin menghapus ${state.selectedAccounts.length} akun ?`,
-				acceptText: "Ya",
-				rejectText: "Tidak",
+				title: i18n("Delete Account"),
+				message: message,
+				acceptText: i18n("Yes"),
+				rejectText: i18n("No"),
 				loading: state.dlgDeleteAccount.loading,
 				onAccepted() { deleteAccounts() },
 				onRejected() { state.dlgDeleteAccount.visible = false }
@@ -466,7 +482,7 @@ export function HomePage() {
 
 		if (dialogs.length === 0 && state.dlgEntryType.visible) {
 			dialogs.push(m(DialogEntryType, {
-				title: "Jenis Entry",
+				title: i18n("Entry Type"),
 				onRejected() { state.dlgEntryType.visible = false },
 				onAccepted(data) {
 					state.dlgNewEntry.type = data.type
@@ -479,9 +495,9 @@ export function HomePage() {
 		if (dialogs.length === 0 && state.dlgNewEntry.visible) {
 			let title = ""
 			switch (state.dlgNewEntry.type) {
-				case 1: title = "Pemasukan Baru"; break
-				case 2: title = "Pengeluaran Baru"; break
-				case 3: title = "Transfer Baru"; break
+				case 1: title = i18n("New Income"); break
+				case 2: title = i18n("New Expense"); break
+				case 3: title = i18n("New Transfer"); break
 			}
 
 			dialogs.push(m(DialogFormEntry, {
@@ -501,9 +517,9 @@ export function HomePage() {
 
 			let title = ""
 			switch (entry.type) {
-				case 1: title = "Edit Pemasukan"; break
-				case 2: title = "Edit Pengeluaran"; break
-				case 3: title = "Edit Transfer"; break
+				case 1: title = i18n("Edit Income"); break
+				case 2: title = i18n("Edit Expense"); break
+				case 3: title = i18n("Edit Transfer"); break
 			}
 
 			dialogs.push(m(DialogFormEntry, {
@@ -518,11 +534,14 @@ export function HomePage() {
 		}
 
 		if (dialogs.length === 0 && state.dlgDeleteEntry.visible) {
+			let message = i18n("Permanently delete $n entries ?")
+				.replace("$n", state.selectedEntries.length)
+
 			dialogs.push(m(DialogConfirm, {
-				title: "Delete Entry",
-				message: `Yakin ingin menghapus ${state.selectedEntries.length} entry ?`,
-				acceptText: "Ya",
-				rejectText: "Tidak",
+				title: i18n("Delete Entry"),
+				message: message,
+				acceptText: i18n("Yes"),
+				rejectText: i18n("No"),
 				loading: state.dlgDeleteEntry.loading,
 				onAccepted() { deleteEntries() },
 				onRejected() { state.dlgDeleteEntry.visible = false }
@@ -570,7 +589,6 @@ export function HomePage() {
 				onNewClicked() { state.dlgEntryType.visible = true },
 				onEditClicked() { state.dlgEditEntry.visible = true },
 				onDeleteClicked() { state.dlgDeleteEntry.visible = true },
-				onItemClicked(entry) { }, // TODO
 				onPageChanged(page) {
 					state.pagination.page = page
 					loadEntries()

@@ -2,6 +2,10 @@ import {
 	DialogForm
 } from "./form.min.js"
 
+import {
+	i18n
+} from "../i18n/i18n.min.js"
+
 export function DialogFormEntry() {
 	function isoDateString(d) {
 		let date = String(d.getDate()).padStart(2, "0"),
@@ -36,26 +40,26 @@ export function DialogFormEntry() {
 		// Create form fields
 		let formFields = [{
 			name: "amount",
-			label: "Jumlah",
+			label: i18n("Amount"),
 			type: "float",
 			min: 0,
 			required: true
 		}, {
 			name: "date",
-			label: "Tanggal entri",
+			label: i18n("Entry date"),
 			type: "date",
 			required: true
 		}]
 
 		if (entryType !== 3) formFields.unshift({
 			name: "description",
-			label: "Deskripsi",
+			label: i18n("Description"),
 			required: true
 		})
 
 		if (entryType === 3) formFields.push({
 			name: "affectedAccountId",
-			label: "Tujuan",
+			label: i18n("Target"),
 			type: "select",
 			required: true,
 			choices: accounts.map(account => {

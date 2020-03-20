@@ -2,6 +2,10 @@ import {
 	DialogForm
 } from "./form.min.js"
 
+import {
+	i18n
+} from "../i18n/i18n.min.js"
+
 export function DialogFormPassword() {
 	function renderView(vnode) {
 		// Parse attributes and set default value
@@ -18,18 +22,18 @@ export function DialogFormPassword() {
 		// Create form fields
 		let formFields = [{
 			name: "oldPassword",
-			label: "Password lama",
+			label: i18n("Old password"),
 			type: "password",
 			required: true
 		}, {
 			name: "newPassword",
-			label: "Password baru",
+			label: i18n("New password"),
 			type: "password",
 			required: true
 		}, {
 			name: "repeatPassword",
+			label: i18n("Repeat"),
 			type: "password",
-			label: "Ulangi",
 			required: true
 		}]
 
