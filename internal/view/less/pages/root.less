@@ -12,6 +12,8 @@
 	overflow             : hidden;
 }
 
+// Sidebar styles
+
 .sidebar {
 	display         : flex;
 	flex-flow       : column nowrap;
@@ -24,9 +26,9 @@
 	&::after {
 		display         : block;
 		width           : 1px;
+		height          : 100%;
 		position        : absolute;
 		top             : 0;
-		bottom          : 0;
 		right           : 0;
 		content         : "";
 		background-color: var(--border);
@@ -42,6 +44,7 @@
 	cursor      : pointer;
 	border      : 1px solid transparent;
 	border-width: 1px 4px;
+	flex-shrink : 0;
 
 	&:hover,
 	&:focus {
@@ -66,4 +69,48 @@
 
 .sidebar__spacer {
 	flex: 1;
+}
+
+// Mobile styles
+
+@media screen and (max-width: 600px) {
+	.root {
+		grid-template-rows   : 1fr auto;
+		grid-template-columns: 1fr;
+	}
+
+	.sidebar {
+		order     : 2;
+		flex-flow : row nowrap;
+		width     : auto;
+		overflow-x: auto;
+		overflow-y: hidden;
+
+		&::after {
+			display         : block;
+			height          : 1px;
+			width           : 100%;
+			position        : absolute;
+			top             : 0;
+			left            : 0;
+			right           : auto;
+			content         : "";
+			background-color: var(--border);
+		}
+	}
+
+	.sidebar__button {
+		border-width: 4px 1px;
+
+		.tooltip {
+			display: none !important;
+		}
+	}
+
+	.sidebar__button--active {
+		border-top-color   : var(--app-bg);
+		border-left-color  : var(--border);
+		border-right-color : var(--border);
+		border-bottom-color: var(--main);
+	}
 }

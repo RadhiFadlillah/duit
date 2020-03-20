@@ -68,10 +68,10 @@ export function EntryList() {
 			selection = vnode.attrs.selection,
 			currentPage = vnode.attrs.currentPage,
 			maxPage = vnode.attrs.maxPage,
-			onItemClicked = vnode.attrs.onItemClicked,
 			onNewClicked = vnode.attrs.onNewClicked,
 			onEditClicked = vnode.attrs.onEditClicked,
 			onDeleteClicked = vnode.attrs.onDeleteClicked,
+			onBackClicked = vnode.attrs.onBackClicked,
 			onPageChanged = vnode.attrs.onPageChanged
 
 		if (typeof account != "object") account = {}
@@ -81,10 +81,10 @@ export function EntryList() {
 		if (!Array.isArray(selection)) selection = []
 		if (typeof currentPage != "number") currentPage = 1
 		if (typeof maxPage != "number") maxPage = 1
-		if (typeof onItemClicked != "function") onItemClicked = () => { }
 		if (typeof onNewClicked != "function") onNewClicked = () => { }
 		if (typeof onEditClicked != "function") onEditClicked = () => { }
 		if (typeof onDeleteClicked != "function") onDeleteClicked = () => { }
+		if (typeof onBackClicked != "function") onBackClicked = () => { }
 		if (typeof onPageChanged != "function") onPageChanged = () => { }
 
 		// Render header
@@ -205,8 +205,8 @@ export function EntryList() {
 			contents.push(m(".entry-list__space"))
 		}
 
-		// If needed, add pagination as well
-		if (maxPage > 1) {
+		// Add pagination as well
+		if (!loading) {
 			let attrs = {
 				iconOnly: true,
 				tooltipPosition: "top",
@@ -221,6 +221,13 @@ export function EntryList() {
 			}
 
 			contents.push(m(".entry-list__footer",
+				m(Button, {
+					class: "entry-list__footer__back-button",
+					iconOnly: false,
+					caption: i18n("Go back"),
+					onclick() { onBackClicked() }
+				}),
+				m(".entry-list__footer__spacer"),
 				m(Button, mergeObject(attrs, {
 					icon: "fa-angle-double-left",
 					caption: i18n("First page"),

@@ -102,7 +102,8 @@
 }
 
 .entry__description {
-	font-size: 0.9rem;
+	font-size : 0.9rem;
+	word-break: break-word;
 }
 
 .entry__amount {
@@ -138,17 +139,38 @@
 	align-items    : center;
 	justify-content: center;
 	border-top     : 1px solid var(--border);
-
-	>*:not(:last-child) {
-		margin-right: 0.5rem;
-	}
 }
 
 .entry-list__footer__button {
 	padding: 0;
 }
 
+.entry-list__footer__back-button {
+	padding    : 0;
+	display    : none;
+	font-weight: 600;
+	border     : 0;
+}
+
+.entry-list__footer__spacer {
+	display: none;
+}
+
 .entry-list__footer__page {
 	font-size: 0.9rem;
 	color    : var(--link-color);
+	margin   : 0 0.5rem;
+}
+
+// Mobile styles
+
+@media screen and (max-width: 600px) {
+	.entry-list__footer__back-button {
+		display: block;
+	}
+
+	.entry-list__footer__spacer {
+		display: block;
+		flex   : 1;
+	}
 }

@@ -589,6 +589,7 @@ export function HomePage() {
 				onNewClicked() { state.dlgEntryType.visible = true },
 				onEditClicked() { state.dlgEditEntry.visible = true },
 				onDeleteClicked() { state.dlgDeleteEntry.visible = true },
+				onBackClicked() { state.activeAccount = null },
 				onPageChanged(page) {
 					state.pagination.page = page
 					loadEntries()
