@@ -138,7 +138,7 @@ func (auth *Authenticator) AuthenticateUser(r *http.Request) error {
 	}
 
 	// If session almost expired, prolong it
-	if expTime.Sub(time.Now()).Hours() < 1 {
+	if expTime.Sub(time.Now()).Hours() < 1 && user.ID != 0 {
 		auth.sessionManager.ProlongUserSession(session, 0)
 	}
 
