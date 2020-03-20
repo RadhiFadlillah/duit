@@ -112,6 +112,7 @@ export default new Map([
 	["Previous page", "Halaman sebelumnya"],
 	["Next page", "Halaman selanjutnya"],
 	["Last page", "Halaman terakhir"],
+	["Go back", "Kembali"],
 
 	// User List
 	["User List", "Daftar User"],

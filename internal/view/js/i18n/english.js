@@ -112,6 +112,7 @@ export default new Map([
 	["Previous page"],
 	["Next page"],
 	["Last page"],
+	["Go back"],
 
 	// User List
 	["User List"],
