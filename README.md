@@ -23,6 +23,10 @@ Duit is a simple money tracker written in Go language and Mithril.js. I created 
 
    ![Simple chart](https://raw.githubusercontent.com/RadhiFadlillah/duit/master/docs/readme/simple-chart.png)
 
+- Responsive on mobile.
+
+   ![Mobile responsive](https://raw.githubusercontent.com/RadhiFadlillah/duit/master/docs/readme/mobile.png)
+
 ## Attributions
 
 Original logo is created by [Freepik](https://www.flaticon.com/authors/freepik) in theirs [business pack](https://www.flaticon.com/packs/business-471), which can be downloaded from [www.flaticon.com](https://www.flaticon.com/).
