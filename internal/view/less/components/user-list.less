@@ -32,6 +32,10 @@
 	flex-flow  : row nowrap;
 	flex-shrink: 0;
 	align-items: center;
+
+	>*:not(:last-child) {
+		margin-right: 0.5rem;
+	}
 }
 
 .user-list__header__title {
@@ -41,10 +45,6 @@
 	flex         : 1 0;
 	font-size    : 0.9rem;
 	font-weight  : 600;
-
-	&:not(:last-child) {
-		margin-right: 0.5rem;
-	}
 }
 
 .user-list__header__button {
@@ -73,8 +73,15 @@
 	display      : flex;
 	flex-flow    : row nowrap;
 	border-bottom: 1px solid var(--border);
+	cursor       : pointer;
 	padding-left : 0.5rem;
 	color        : var(--font-color);
+
+	&:hover,
+	&:focus {
+		color           : var(--main-dark);
+		background-color: var(--alternate-row-bg);
+	}
 
 	&:last-child {
 		border-bottom: 0;
@@ -82,14 +89,14 @@
 }
 
 .user__check {
-	align-self  : center;
-	margin-right: 0.5rem;
+	align-self: center;
 }
 
 .user__data {
 	display     : flex;
 	flex-flow   : column nowrap;
 	flex        : 1 0;
+	margin-left : 0.5rem;
 	padding     : 0.5rem;
 	padding-left: 0;
 }

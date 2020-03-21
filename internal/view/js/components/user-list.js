@@ -143,7 +143,7 @@ export function UserList() {
 
 			return m(".user",
 				m("input[type=checkbox].user__check", checkAttrs),
-				m(".user__data",
+				m(".user__data", { onclick() { toggleSelection(selection, idx) } },
 					m("p.user__name", user.name),
 					m("p.user__username", user.username),
 				)

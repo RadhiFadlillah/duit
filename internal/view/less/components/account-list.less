@@ -32,6 +32,10 @@
 	flex-flow  : row nowrap;
 	flex-shrink: 0;
 	align-items: center;
+
+	>*:not(:last-child) {
+		margin-right: 0.5rem;
+	}
 }
 
 .account-list__header__title {
@@ -85,14 +89,14 @@
 }
 
 .account__check {
-	align-self  : center;
-	margin-right: 0.5rem;
+	align-self: center;
 }
 
 .account__data {
 	display     : flex;
 	flex-flow   : column nowrap;
 	flex        : 1 0;
+	margin-left : 0.5rem;
 	padding     : 0.5rem;
 	padding-left: 0;
 }

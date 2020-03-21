@@ -197,8 +197,10 @@ export function EntryList() {
 
 				contents.push(m(".entry",
 					m("input[type=checkbox].entry__check", checkAttrs),
-					m("p.entry__description", { class: descriptionClass }, description),
-					m("p.entry__amount", { class: className }, formatNumber(amount)),
+					m(".entry__data", { onclick() { toggleSelection(selection, idx) } },
+						m("p.entry__description", { class: descriptionClass }, description),
+						m("p.entry__amount", { class: className }, formatNumber(amount)),
+					)
 				))
 			})
 		}
