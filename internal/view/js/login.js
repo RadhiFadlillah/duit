@@ -84,27 +84,29 @@ function loginScreen() {
 		})
 
 		return m(".login",
-			...errorNodes,
-			m(".login__form",
-				m("img.login__logo", {
-					src: "/res/logo.svg"
-				}),
-				m("input[type=text].login__input", {
-					value: state.username,
-					placeholder: i18n("Username"),
-					oninput(e) { state.username = e.target.value }
-				}),
-				m("input[type=password].login__input", {
-					value: state.password,
-					placeholder: i18n("Password"),
-					oninput(e) { state.password = e.target.value }
-				}),
-				m(Button, {
-					class: "login__button",
-					caption: i18n("Login"),
-					loading: state.loading,
-					onclick() { login() }
-				})
+			m(".login__body",
+				...errorNodes,
+				m(".login__form",
+					m("img.login__logo", {
+						src: "/res/logo.svg"
+					}),
+					m("input[type=text].login__input", {
+						value: state.username,
+						placeholder: i18n("Username"),
+						oninput(e) { state.username = e.target.value }
+					}),
+					m("input[type=password].login__input", {
+						value: state.password,
+						placeholder: i18n("Password"),
+						oninput(e) { state.password = e.target.value }
+					}),
+					m(Button, {
+						class: "login__button",
+						caption: i18n("Login"),
+						loading: state.loading,
+						onclick() { login() }
+					})
+				),
 			),
 			m("p.attribution", attributionNodes),
 			...loadingCover
