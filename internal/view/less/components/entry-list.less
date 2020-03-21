@@ -40,6 +40,7 @@
 	flex-flow  : row nowrap;
 	flex-shrink: 0;
 	align-items: center;
+	z-index    : 2;
 
 	>*:not(:last-child) {
 		margin-right: 0.5rem;
@@ -57,7 +58,7 @@
 
 .entry-list__header__button {
 	padding         : 0;
-	color           : var(--accent-font);
+	color           : var(--main-font);
 	background-color: transparent;
 	font-size       : 0.9rem;
 
@@ -75,6 +76,7 @@
 	grid-gap             : 0.5rem;
 	grid-template-columns: auto 1fr minmax(30%, 100px);
 	border-bottom        : 1px solid var(--border);
+	color                : var(--font-color);
 
 	&:last-child {
 		border-bottom: 0;
@@ -139,6 +141,7 @@
 	align-items    : center;
 	justify-content: center;
 	border-top     : 1px solid var(--border);
+	z-index        : 1;
 }
 
 .entry-list__footer__button {
