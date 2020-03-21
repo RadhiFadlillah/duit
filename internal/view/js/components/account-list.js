@@ -124,7 +124,7 @@ export function AccountList() {
 
 		let header = m(".account-list__header", headerContents)
 
-		// Render list content
+		// Render list body
 		let contents = []
 
 		if (loading) {
@@ -154,10 +154,12 @@ export function AccountList() {
 			)
 		})
 
+		let body = m(".account-list__body", contents)
+
 		// Render final view
 		return m(".account-list",
 			{ class: className },
-			[header, contents])
+			header, body)
 	}
 
 	return {

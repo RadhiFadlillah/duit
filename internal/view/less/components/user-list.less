@@ -3,8 +3,7 @@
 .user-list {
 	display    : flex;
 	flex-flow  : column nowrap;
-	overflow-y : auto;
-	overflow-x : hidden;
+	overflow   : hidden;
 	background : var(--content-bg);
 	border     : 1px solid var(--border);
 	flex-shrink: 0;
@@ -25,8 +24,6 @@
 // Header styles
 
 .user-list__header {
-	position   : sticky;
-	top        : 0;
 	padding    : 0 0.5rem;
 	height     : 2.5rem;
 	color      : var(--main-font);
@@ -62,7 +59,15 @@
 	}
 }
 
-// Item styles
+// Body styles
+
+.user-list__body {
+	display   : flex;
+	flex-flow : column nowrap;
+	overflow-x: hidden;
+	overflow-y: auto;
+	flex      : 1 0;
+}
 
 .user {
 	display      : flex;
@@ -70,6 +75,10 @@
 	border-bottom: 1px solid var(--border);
 	padding-left : 0.5rem;
 	color        : var(--font-color);
+
+	&:last-child {
+		border-bottom: 0;
+	}
 }
 
 .user__check {

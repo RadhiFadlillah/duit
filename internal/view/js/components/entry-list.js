@@ -132,7 +132,7 @@ export function EntryList() {
 
 		let header = m(".entry-list__header", headerContents)
 
-		// Render list content
+		// Render list body
 		let contents = []
 
 		if (loading) {
@@ -205,7 +205,10 @@ export function EntryList() {
 			contents.push(m(".entry-list__space"))
 		}
 
+		let body = m(".entry-list__body", contents)
+
 		// Add pagination as well
+		let footer = []
 		if (!loading) {
 			let attrs = {
 				iconOnly: true,
@@ -220,7 +223,7 @@ export function EntryList() {
 				last: !loading && currentPage < maxPage - 1,
 			}
 
-			contents.push(m(".entry-list__footer",
+			footer.push(m(".entry-list__footer",
 				m(Button, {
 					class: "entry-list__footer__back-button",
 					iconOnly: false,
@@ -259,7 +262,7 @@ export function EntryList() {
 		// Render final view
 		return m(".entry-list",
 			{ class: className },
-			[header, contents])
+			header, body, ...footer)
 	}
 
 	return {

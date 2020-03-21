@@ -3,8 +3,7 @@
 .entry-list {
 	display    : flex;
 	flex-flow  : column nowrap;
-	overflow-y : auto;
-	overflow-x : hidden;
+	overflow   : hidden;
 	background : var(--content-bg);
 	border     : 1px solid var(--border);
 	flex-shrink: 0;
@@ -30,8 +29,6 @@
 // Header styles
 
 .entry-list__header {
-	position   : sticky;
-	top        : 0;
 	padding    : 0 0.5rem;
 	height     : 2.5rem;
 	color      : var(--main-font);
@@ -40,11 +37,6 @@
 	flex-flow  : row nowrap;
 	flex-shrink: 0;
 	align-items: center;
-	z-index    : 2;
-
-	>*:not(:last-child) {
-		margin-right: 0.5rem;
-	}
 }
 
 .entry-list__header__title {
@@ -54,6 +46,10 @@
 	flex         : 1 0;
 	font-size    : 0.9rem;
 	font-weight  : 600;
+
+	&:not(:last-child) {
+		margin-right: 0.5rem;
+	}
 }
 
 .entry-list__header__button {
@@ -68,7 +64,15 @@
 	}
 }
 
-// Item styles
+// Body styles
+
+.entry-list__body {
+	display   : flex;
+	flex-flow : column nowrap;
+	overflow-x: hidden;
+	overflow-y: auto;
+	flex      : 1 0;
+}
 
 .entry {
 	display              : grid;
@@ -91,7 +95,7 @@
 	border-bottom   : 1px solid var(--border);
 	padding         : 0 0.5rem;
 	position        : sticky;
-	top             : 2.5rem;
+	top             : 0;
 	text-align      : center;
 
 	&:not(:first-child) {
@@ -100,7 +104,8 @@
 }
 
 .entry__check {
-	align-self: center;
+	align-self  : center;
+	margin-right: 0.5rem;
 }
 
 .entry__description {
@@ -129,9 +134,6 @@
 // Footer styles
 
 .entry-list__footer {
-	position       : sticky;
-	bottom         : 0;
-	top            : 2.5rem;
 	padding        : 0 0.5rem;
 	height         : 2.5rem;
 	background     : var(--content-bg);
@@ -141,7 +143,6 @@
 	align-items    : center;
 	justify-content: center;
 	border-top     : 1px solid var(--border);
-	z-index        : 1;
 }
 
 .entry-list__footer__button {

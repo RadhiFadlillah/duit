@@ -120,7 +120,7 @@ export function UserList() {
 
 		let header = m(".user-list__header", headerContents)
 
-		// Render list content
+		// Render list body
 		let contents = []
 
 		if (loading) {
@@ -150,10 +150,12 @@ export function UserList() {
 			)
 		})
 
+		let body = m(".user-list__body", contents)
+
 		// Render final view
 		return m(".user-list",
 			{ class: className },
-			[header, contents])
+			header, body)
 	}
 
 	return {
