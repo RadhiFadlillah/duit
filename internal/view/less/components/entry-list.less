@@ -21,11 +21,6 @@
 	color    : var(--link-color);
 }
 
-.entry-list__space {
-	flex      : 1;
-	min-height: 2.5rem;
-}
-
 // Header styles
 
 .entry-list__header {
@@ -46,6 +41,10 @@
 	flex         : 1 0;
 	font-size    : 0.9rem;
 	font-weight  : 600;
+
+	&:not(:first-child) {
+		margin-left: 0.5rem;
+	}
 
 	&:not(:last-child) {
 		margin-right: 0.5rem;
@@ -104,8 +103,7 @@
 }
 
 .entry__check {
-	align-self  : center;
-	margin-right: 0.5rem;
+	align-self: center;
 }
 
 .entry__description {

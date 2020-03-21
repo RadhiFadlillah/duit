@@ -201,8 +201,6 @@ export function EntryList() {
 					m("p.entry__amount", { class: className }, formatNumber(amount)),
 				))
 			})
-
-			contents.push(m(".entry-list__space"))
 		}
 
 		let body = m(".entry-list__body", contents)
