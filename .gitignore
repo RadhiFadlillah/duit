@@ -4,3 +4,4 @@ config.toml
 
 # Exclude executable
 duit
+duit-dev
