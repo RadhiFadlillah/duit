@@ -26,10 +26,10 @@ export function AccountChart() {
 	}
 
 	function shortenAmount(val) {
-		const trillion = 1_000_000_000_000,
-			billion = 1_000_000_000,
-			million = 1_000_000,
-			thousand = 1_000
+		const trillion = 1000000000000,
+			billion = 1000000000,
+			million = 1000000,
+			thousand = 1000
 
 		if (val >= trillion) return Math.round(val / trillion) + "T"
 		if (val >= billion) return Math.round(val / billion) + "B"
@@ -72,8 +72,10 @@ export function AccountChart() {
 			labels: labels,
 			series: normalizedSeries
 		}, {
-			lineSmooth: false,
 			fullWidth: true,
+			lineSmooth: Chartist.Interpolation.none({
+				fillHoles: true,
+			}),
 			chartPadding: {
 				top: 24,
 				right: 24,
