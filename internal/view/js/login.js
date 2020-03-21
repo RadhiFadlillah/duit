@@ -63,6 +63,26 @@ function loginScreen() {
 			loadingCover.push(m(LoadingCover))
 		}
 
+		let attributionNodes = i18n("Original logo by $author from $website").split(" ").map(str => {
+			if (str === "$author") {
+				return m("a.attribution__link", {
+					target: "_blank",
+					rel: "noopener",
+					href: "https://www.flaticon.com/authors/freepik"
+				}, "Freepik ")
+			}
+
+			if (str === "$website") {
+				return m("a.attribution__link", {
+					target: "_blank",
+					rel: "noopener",
+					href: "https://www.flaticon.com"
+				}, "www.flaticon.com ")
+			}
+
+			return str + " "
+		})
+
 		return m(".login",
 			...errorNodes,
 			m(".login__form",
@@ -86,6 +106,7 @@ function loginScreen() {
 					onclick() { login() }
 				})
 			),
+			m("p.attribution", attributionNodes),
 			...loadingCover
 		)
 	}

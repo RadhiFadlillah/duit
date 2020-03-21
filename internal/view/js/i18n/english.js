@@ -36,6 +36,7 @@ export default new Map([
 	["Username"],
 	["Password"],
 	["Login"],
+	["Original logo by $author from $website"],
 
 	/*
 	* PAGES

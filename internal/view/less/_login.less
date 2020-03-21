@@ -22,7 +22,8 @@ html {
 	height         : 100vh;
 	max-width      : 100vw;
 	max-height     : 100vh;
-	padding        : 16px;
+	overflow       : hidden;
+	padding        : 1rem 1rem 2rem;
 }
 
 .login__error,
@@ -47,6 +48,7 @@ html {
 	display    : flex;
 	flex-flow  : column nowrap;
 	align-items: center;
+	overflow   : auto;
 
 	*:not(:last-child) {
 		margin-bottom: 0.5rem;
@@ -80,5 +82,27 @@ html {
 
 	span {
 		outline: none;
+	}
+}
+
+.attribution {
+	display    : block;
+	font-size  : 0.9rem;
+	position   : absolute;
+	bottom     : 0;
+	left       : 0;
+	right      : 0;
+	line-height: 2rem;
+	text-align : center;
+	color      : var(--link-color);
+}
+
+.attribution__link {
+	font-weight: 600;
+	color      : var(--link-color);
+
+	&:hover,
+	&:focus {
+		color: var(--main-dark)
 	}
 }

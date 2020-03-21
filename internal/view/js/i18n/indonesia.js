@@ -36,6 +36,7 @@ export default new Map([
 	["Username", "Username"],
 	["Password", "Password"],
 	["Login", "Login"],
+	["Original logo by $author from $website", "Logo asli dibuat oleh $author dari $website"],
 
 	/*
 	* PAGES
