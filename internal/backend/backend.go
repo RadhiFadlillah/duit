@@ -3,7 +3,6 @@ package backend
 import (
 	"fmt"
 	"net/http"
-	"strings"
 	"time"
 
 	"github.com/RadhiFadlillah/duit/internal/backend/api"
@@ -14,20 +13,6 @@ import (
 	"github.com/julienschmidt/httprouter"
 	"github.com/sirupsen/logrus"
 )
-
-// SlowDown is middleware to throttle response speed.
-// Used to emulate low connection speed.
-type SlowDown struct {
-	router http.Handler
-}
-
-func (sd SlowDown) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	if strings.HasPrefix(r.URL.Path, "/api") {
-		time.Sleep(500 * time.Millisecond)
-	}
-
-	sd.router.ServeHTTP(w, r)
-}
 
 // ServeApp serves web app in specified port
 func ServeApp(db *sqlx.DB, port int) error {
@@ -87,7 +72,7 @@ func ServeApp(db *sqlx.DB, port int) error {
 	url := fmt.Sprintf(":%d", port)
 	svr := &http.Server{
 		Addr:         url,
-		Handler:      SlowDown{router},
+		Handler:      router,
 		ReadTimeout:  10 * time.Second,
 		WriteTimeout: time.Minute,
 	}
