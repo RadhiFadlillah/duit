@@ -27,6 +27,47 @@ Duit is a simple money tracker written in Go language and Mithril.js. I created 
 
    ![Mobile responsive](https://raw.githubusercontent.com/RadhiFadlillah/duit/master/docs/readme/mobile.png)
 
+## Installation
+
+You can download the latest version of `duit` from release page. You can also build it from source by running :
+
+```
+go get -u -v github.com/RadhiFadlillah/duit
+```
+
+Make sure you have `go >= 1.13` before building it.
+
+## Usage
+
+```
+Duit, the simple money manager
+
+Usage:
+  duit [flags]
+
+Flags:
+  -c, --config string   path to config file (default "/home/radhi/.config/duit/config.toml")
+  -h, --help            help for duit
+  -p, --port int        port used by the server (default 8080)
+```
+
+## Configuration
+
+Duit uses MariaDB or MySQL database, so make sure it's installed on your system before you start `duit`. 
+
+As can be seen from usage documentation above, `duit` needs to be configurated before it started. The configuration file by default is located in user config dir (which is `$XDG_CONFIG_HOME` in Linux), but can be set manually by user.
+
+The configuration file is a TOML file with following contents (change it depending on your case) :
+
+```toml
+dbName = "duit"
+dbUser = "root"
+dbHost = "127.0.0.1"
+dbPassword = ""
+```
+
+Once configuration file created, you can start using `duit`.
+
 ## Attributions
 
 Original logo is created by [Freepik](https://www.flaticon.com/authors/freepik) in theirs [business pack](https://www.flaticon.com/packs/business-471), which can be downloaded from [www.flaticon.com](https://www.flaticon.com/).
