@@ -16,6 +16,8 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var defaultConfigPath = "config.toml"
+
 func main() {
 	// Format logrus
 	logrus.SetFormatter(&logrus.TextFormatter{
@@ -29,12 +31,12 @@ func main() {
 	// Prepare cmd
 	cmd := &cobra.Command{
 		Use:   "duit",
-		Short: "Start duit, the simple money manager",
+		Short: "Duit, the simple money manager",
 		RunE:  cmdHandler,
 	}
 
-	cmd.Flags().IntP("port", "p", 8080, "Port used by the server")
-	cmd.Flags().StringP("config", "c", "config.toml", "Path to config file")
+	cmd.Flags().IntP("port", "p", 8080, "port used by the server")
+	cmd.Flags().StringP("config", "c", defaultConfigPath, "path to config file")
 
 	// Execute
 	err := cmd.Execute()
