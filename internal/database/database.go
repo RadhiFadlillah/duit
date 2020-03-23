@@ -58,6 +58,7 @@ func Open(config model.Config) (db *sqlx.DB, err error) {
 
 	// Generate views
 	tx.MustExec(ddlCreateViewAccountTotal)
+	tx.MustExec(ddlCreateViewCumulativeAmount)
 
 	// Commit transaction
 	err = tx.Commit()
