@@ -66,7 +66,7 @@ dbHost = "127.0.0.1"
 dbPassword = ""
 ```
 
-Once configuration file created, you can start using `duit`.
+Once configuration file created, you can start using `duit`. For first login, you can use any username and password. However, you should create an user as soon as possible.
 
 ## Attributions
 
