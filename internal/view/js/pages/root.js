@@ -208,16 +208,16 @@ export function Root() {
 				caption: i18n("Money chart"),
 				href: "#!/chart"
 			})),
-			m(Button, sidebarAttrs("users", {
-				icon: "fa-user-cog",
-				caption: i18n("User management"),
-				href: "#!/users"
-			})),
 			m(".sidebar__spacer"),
 			m(Button, sidebarAttrs(null, {
 				icon: "fa-flag",
 				caption: i18n("Change language"),
 				onclick() { state.dlgLanguage.visible = true }
+			})),
+			m(Button, sidebarAttrs(null, {
+				icon: "fa-key",
+				caption: i18n("Change password"),
+				onclick() { state.dlgPassword.visible = true }
 			})),
 			m(Button, sidebarAttrs(null, {
 				icon: "fa-sign-out-alt",
@@ -226,12 +226,12 @@ export function Root() {
 			})),
 		]
 
-		if (state.user != null) {
-			sidebarButtons.splice(5, 0,
-				m(Button, sidebarAttrs(null, {
-					icon: "fa-key",
-					caption: i18n("Change password"),
-					onclick() { state.dlgPassword.visible = true }
+		if (state.user != null && state.user.admin) {
+			sidebarButtons.splice(2, 0,
+				m(Button, sidebarAttrs("users", {
+					icon: "fa-user-cog",
+					caption: i18n("User management"),
+					href: "#!/users"
 				}))
 			)
 		}

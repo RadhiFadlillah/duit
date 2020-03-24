@@ -30,6 +30,11 @@ export function DialogFormUser() {
 			name: "username",
 			label: i18n("Username"),
 			required: true
+		}, {
+			name: "admin",
+			label: i18n("User is administrator"),
+			type: "boolean",
+			required: true,
 		}]
 
 		formFields.forEach((field, i) => {

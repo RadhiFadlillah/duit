@@ -109,5 +109,14 @@ func ServeApp(db *sqlx.DB, port int) error {
 }
 
 func authenticationRules(user model.User, method, url string) bool {
+	// For user management, onloy allow if user is admin
+	switch url {
+	case "/api/user",
+		"/api/users",
+		"/api/user/password",
+		"/api/user/password/reset":
+		return user.Admin
+	}
+
 	return true
 }

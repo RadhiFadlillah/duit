@@ -153,4 +153,7 @@ export default new Map([
 	["Old password"],
 	["New password"],
 	["Repeat"],
+
+	// Form user
+	["User is administrator"],
 ])
