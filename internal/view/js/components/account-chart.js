@@ -31,11 +31,16 @@ export function AccountChart() {
 			million = 1000000,
 			thousand = 1000
 
-		if (val >= trillion) return Math.round(val / trillion) + "T"
-		if (val >= billion) return Math.round(val / billion) + "B"
-		if (val >= million) return Math.round(val / million) + "M"
-		if (val >= thousand) return Math.round(val / thousand) + "K"
-		return val;
+		let isNegative = val < 0
+		if (isNegative) val = Math.abs(val)
+
+		let short = val
+		if (val >= trillion) short = Math.round(val / trillion) + "T"
+		else if (val >= billion) short = Math.round(val / billion) + "B"
+		else if (val >= million) short = Math.round(val / million) + "M"
+		else if (val >= thousand) short = Math.round(val / thousand) + "K"
+
+		return isNegative ? "-" + short : short
 	}
 
 	function renderChart(dom, opts) {
