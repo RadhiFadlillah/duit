@@ -33,10 +33,16 @@ export default new Map([
 	["Cancel", "Cancel"],
 
 	// Login screen
+	["Login", "Login"],
+	["Register", "Register"],
+	["Name", "Nama"],
 	["Username", "Username"],
 	["Password", "Password"],
-	["Login", "Login"],
+	["Repeat password", "Ulangi password"],
+	["Welcome, new user", "Selamat datang, user baru"],
 	["Original logo by $author from $website", "Logo asli dibuat oleh $author dari $website"],
+	// Register and login screen -- API message
+	["new password doesn't match", "password baru yang diulang tidak cocok"],
 
 	/*
 	* PAGES
@@ -54,8 +60,6 @@ export default new Map([
 	["User management", "Kelola user"],
 	["Change password", "Ganti password"],
 	["Change language", "Ganti bahasa"],
-	// Root page -- API message
-	["new password doesn't match", "password baru yang diulang tidak cocok"],
 
 	// Home page -- dialog title
 	["New Account", "Akun Baru"],
@@ -137,7 +141,6 @@ export default new Map([
 	["Transfer", "Transfer"],
 
 	// Form Account
-	["Name", "Name"],
 	["Initial amount", "Jumlah awal"],
 
 	// Form Entry
@@ -145,9 +148,6 @@ export default new Map([
 	["Entry date", "Tanggal entry"],
 	["Description", "Deskripsi"],
 	["Target", "Tujuan"],
-
-	// Form User
-	["Username", "Username"],
 
 	// Form Password
 	["Old password", "Password lama"],

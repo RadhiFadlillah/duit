@@ -104,7 +104,14 @@ function loginScreen() {
 						class: "login__button",
 						caption: i18n("Login"),
 						loading: state.loading,
-						onclick() { login() }
+						onclick() {
+							// Make sure fields not empty
+							if (state.username === "" || state.password === "") {
+								return
+							}
+
+							login()
+						}
 					})
 				),
 			),

@@ -19,7 +19,7 @@ func (h *Handler) SelectUsers(w http.ResponseWriter, r *http.Request, ps httprou
 	// Fetch from database
 	users := []model.User{}
 	err := h.db.Select(&users,
-		`SELECT id, username, name FROM user ORDER BY name`)
+		`SELECT id, username, name, admin FROM user ORDER BY name`)
 	checkError(err)
 
 	// Return list of users
@@ -31,9 +31,6 @@ func (h *Handler) SelectUsers(w http.ResponseWriter, r *http.Request, ps httprou
 
 // InsertUser is handler for POST /api/user
 func (h *Handler) InsertUser(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-	// Make sure session still valid
-	h.auth.MustAuthenticateUser(r)
-
 	// Decode request
 	var user model.User
 	err := json.NewDecoder(r.Body).Decode(&user)
@@ -48,8 +45,39 @@ func (h *Handler) InsertUser(w http.ResponseWriter, r *http.Request, ps httprout
 		panic(fmt.Errorf("username must not empty"))
 	}
 
-	// Generate password
-	user.Password = randomString(10)
+	// Generate password if needed
+	if user.Password == "" {
+		user.Password = randomString(10)
+	}
+
+	// Start transaction
+	// Make sure to rollback if panic ever happened
+	tx := h.db.MustBegin()
+
+	defer func() {
+		if r := recover(); r != nil {
+			tx.Rollback()
+			panic(r)
+		}
+	}()
+
+	// Prepare statements
+	stmtCountAdmin, err := tx.Preparex(`SELECT COUNT(id) 
+		FROM user WHERE admin = 1`)
+	checkError(err)
+
+	stmtInsert, err := tx.Preparex(`INSERT INTO user
+		(username, name, password, admin) VALUES (?, ?, ?, ?)`)
+	checkError(err)
+
+	// If admin already exists, make sure session still valid
+	var nAdmin int
+	err = stmtCountAdmin.Get(&nAdmin)
+	checkError(err)
+
+	if nAdmin > 0 {
+		h.auth.MustAuthenticateUser(r)
+	}
 
 	// Hash password with bcrypt
 	password := []byte(user.Password)
@@ -57,10 +85,12 @@ func (h *Handler) InsertUser(w http.ResponseWriter, r *http.Request, ps httprout
 	checkError(err)
 
 	// Insert user to database
-	res := h.db.MustExec(`INSERT INTO user
-		(username, name, password) VALUES (?, ?, ?)`,
-		user.Username, user.Name, hashedPassword)
+	res := stmtInsert.MustExec(user.Username, user.Name, hashedPassword, user.Admin)
 	user.ID, _ = res.LastInsertId()
+
+	// Commit transaction
+	err = tx.Commit()
+	checkError(err)
 
 	// Return inserted user
 	w.Header().Add("Content-Encoding", "gzip")
@@ -97,6 +127,9 @@ func (h *Handler) DeleteUsers(w http.ResponseWriter, r *http.Request, ps httprou
 	stmtDelete, err := tx.Preparex(`DELETE FROM user WHERE id = ?`)
 	checkError(err)
 
+	stmtCountAdmin, err := tx.Preparex(`SELECT COUNT(id) FROM user WHERE admin = 1`)
+	checkError(err)
+
 	// Delete from database
 	for _, id := range ids {
 		var username string
@@ -108,6 +141,15 @@ func (h *Handler) DeleteUsers(w http.ResponseWriter, r *http.Request, ps httprou
 
 		stmtDelete.MustExec(id)
 		h.auth.MassLogout(username)
+	}
+
+	// Make sure at least one admin exists
+	var nAdmin int
+	err = stmtCountAdmin.Get(&nAdmin)
+	checkError(err)
+
+	if nAdmin == 0 {
+		panic(fmt.Errorf("at least one admin must exists"))
 	}
 
 	// Commit transaction
@@ -135,8 +177,10 @@ func (h *Handler) UpdateUser(w http.ResponseWriter, r *http.Request, ps httprout
 	}
 
 	// Update user in database
-	h.db.MustExec(`UPDATE user SET username = ?, name = ? WHERE id = ?`,
-		user.Username, user.Name, user.ID)
+	h.db.MustExec(`UPDATE user 
+		SET username = ?, name = ?, admin = ? 
+		WHERE id = ?`,
+		user.Username, user.Name, user.Admin, user.ID)
 
 	// Return updated user
 	w.Header().Add("Content-Encoding", "gzip")

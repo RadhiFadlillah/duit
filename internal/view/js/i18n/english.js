@@ -32,11 +32,17 @@ export default new Map([
 	["OK"],
 	["Cancel"],
 
-	// Login screen
+	// Register and login screen
+	["Login"],
+	["Register"],
+	["Name"],
 	["Username"],
 	["Password"],
-	["Login"],
+	["Repeat password"],
+	["Welcome, new user"],
 	["Original logo by $author from $website"],
+	// Register and login screen -- API message
+	["new password doesn't match"],
 
 	/*
 	* PAGES
@@ -54,8 +60,6 @@ export default new Map([
 	["User management"],
 	["Change password"],
 	["Change language"],
-	// Root page -- API message
-	["new password doesn't match"],
 
 	// Home page -- dialog title
 	["New Account"],
@@ -137,7 +141,6 @@ export default new Map([
 	["Transfer"],
 
 	// Form Account
-	["Name"],
 	["Initial amount"],
 
 	// Form Entry
@@ -145,9 +148,6 @@ export default new Map([
 	["Entry date"],
 	["Description"],
 	["Target"],
-
-	// Form User
-	["Username"],
 
 	// Form Password
 	["Old password"],

@@ -39,7 +39,7 @@ func ServeApp(db *sqlx.DB, port int) error {
 		return fmt.Errorf("failed to create authenticator: %w", err)
 	}
 
-	uiHdl, err := ui.NewHandler(auth)
+	uiHdl, err := ui.NewHandler(db, auth)
 	if err != nil {
 		return fmt.Errorf("failed to create UI handler: %w", err)
 	}
@@ -54,6 +54,7 @@ func ServeApp(db *sqlx.DB, port int) error {
 
 	router.GET("/", uiHdl.ServeIndex)
 	router.GET("/login", uiHdl.ServeLogin)
+	router.GET("/register", uiHdl.ServeRegister)
 	router.GET("/js/*filepath", uiHdl.ServeJsFile)
 	router.GET("/res/*filepath", uiHdl.ServeFile)
 	router.GET("/css/*filepath", uiHdl.ServeFile)

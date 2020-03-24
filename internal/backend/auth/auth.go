@@ -46,50 +46,32 @@ func (auth *Authenticator) Login(username, password string) (string, model.User,
 	defer tx.Rollback()
 
 	// Prepare statements
-	stmtGetUserCount, err := tx.Preparex(`
-		SELECT COUNT(id) FROM user`)
-	if err != nil {
-		return "", emptyUser, fmt.Errorf("failed to prepare query: %w", err)
-	}
-
 	stmtGetUser, err := tx.Preparex(`
-		SELECT id, username, name, password
+		SELECT id, username, name, password, admin
 		FROM user WHERE username = ?`)
 	if err != nil {
 		return "", emptyUser, fmt.Errorf("failed to prepare query: %w", err)
 	}
 
-	// Get count of user
-	var nUser int
-	err = stmtGetUserCount.Get(&nUser)
-	if err != nil {
-		return "", emptyUser, fmt.Errorf("failed to get user count: %w", err)
+	// Fetch user from database
+	var user model.User
+	err = stmtGetUser.Get(&user, username)
+	if err != nil && err != sql.ErrNoRows {
+		return "", emptyUser, fmt.Errorf("failed to get user: %w", err)
 	}
 
-	// Get user from database
-	var user model.User
-	if nUser > 0 {
-		err = stmtGetUser.Get(&user, username)
-		if err != nil && err != sql.ErrNoRows {
-			return "", emptyUser, fmt.Errorf("failed to get user: %w", err)
-		}
+	if err == sql.ErrNoRows {
+		return "", emptyUser, fmt.Errorf("user doesn't exist")
+	}
 
-		if err == sql.ErrNoRows {
-			return "", emptyUser, fmt.Errorf("user doesn't exist")
-		}
-
-		err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password))
-		if err != nil {
-			return "", emptyUser, fmt.Errorf("username and password don't match")
-		}
+	// Make sure its password matched.
+	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password))
+	if err != nil {
+		return "", emptyUser, fmt.Errorf("username and password don't match")
 	}
 
 	// Save user to session manager
 	expTime := time.Duration(0)
-	if user.ID == 0 {
-		expTime = 15 * time.Minute
-	}
-
 	session, err := auth.sessionManager.RegisterUser(user, expTime)
 	if err != nil {
 		return "", emptyUser, fmt.Errorf("failed to register user: %w", err)

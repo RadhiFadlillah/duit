@@ -16,6 +16,7 @@ CREATE TABLE IF NOT EXISTS account (
 	id             INT UNSIGNED  NOT NULL AUTO_INCREMENT,
 	name           VARCHAR(100)  NOT NULL,
 	initial_amount DECIMAL(20,4) NOT NULL DEFAULT 0,
+	admin          BOOLEAN       NOT NULL DEFAULT 1,
 	PRIMARY KEY (id))
 	CHARACTER SET utf8mb4
 `

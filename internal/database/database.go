@@ -60,6 +60,9 @@ func Open(config model.Config) (db *sqlx.DB, err error) {
 	tx.MustExec(ddlCreateViewAccountTotal)
 	tx.MustExec(ddlCreateViewCumulativeAmount)
 
+	// Upgrade table
+	tx.MustExec(ddlUpgradeUserAddAdmin)
+
 	// Commit transaction
 	err = tx.Commit()
 	checkError(err)

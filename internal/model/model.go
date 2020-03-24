@@ -15,10 +15,11 @@ type Config struct {
 
 // User is container for user's data
 type User struct {
-	ID       int64  `db:"id"          json:"id"`
-	Username string `db:"username"    json:"username"`
-	Name     string `db:"name"        json:"name"`
-	Password string `db:"password"    json:"password,omitempty"`
+	ID       int64  `db:"id"       json:"id"`
+	Username string `db:"username" json:"username"`
+	Name     string `db:"name"     json:"name"`
+	Password string `db:"password" json:"password,omitempty"`
+	Admin    bool   `db:"admin"    json:"admin"`
 }
 
 // Account is container for financial account
