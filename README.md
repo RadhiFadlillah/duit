@@ -29,13 +29,15 @@ Duit is a simple money tracker written in Go language and Mithril.js. I created 
 
 ## Installation
 
-You can download the latest version of `duit` from release page. You can also build it from source by running :
+You can download the latest version of `duit` from release page. To built from source, make sure you use `go >= 1.13` then run following commands :
 
 ```
-go get -u -v github.com/RadhiFadlillah/duit
+git clone git@github.com:RadhiFadlillah/duit.git
+cd duit
+go build -v -tags prod
 ```
 
-Make sure you have `go >= 1.13` before building it.
+After build finished, put it into your `$PATH` then run it.
 
 ## Usage
 
