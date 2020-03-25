@@ -13,6 +13,11 @@ type Config struct {
 	DbName     string
 }
 
+// Category is container for expense's category
+type Category struct {
+	Name 	string 	`db:"name" json:"name"`
+}
+
 // User is container for user's data
 type User struct {
 	ID       int64  `db:"id"          json:"id"`
@@ -38,6 +43,7 @@ type Entry struct {
 	AffectedAccountID null.Int        `db:"affected_account_id" json:"affectedAccountId"`
 	Type              int             `db:"type"                json:"type"`
 	Description       null.String     `db:"description"         json:"description"`
+	Category		  null.String 	  `db:"category"			json:"category"`
 	Amount            decimal.Decimal `db:"amount"              json:"amount"`
 	Date              string          `db:"date"                json:"date"`
 

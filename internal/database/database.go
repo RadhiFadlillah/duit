@@ -54,6 +54,7 @@ func Open(config model.Config) (db *sqlx.DB, err error) {
 	// 	Generate tables
 	tx.MustExec(ddlCreateUser)
 	tx.MustExec(ddlCreateAccount)
+	tx.MustExec(ddlCreateCategory)
 	tx.MustExec(ddlCreateEntry)
 
 	// Generate views
