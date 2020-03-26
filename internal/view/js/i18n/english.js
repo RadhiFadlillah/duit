@@ -144,6 +144,7 @@ export default new Map([
 	["Amount"],
 	["Entry date"],
 	["Description"],
+	["Category"],
 	["Target"],
 
 	// Form User

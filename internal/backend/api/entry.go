@@ -187,7 +187,7 @@ func (h *Handler) UpdateEntry(w http.ResponseWriter, r *http.Request, ps httprou
 	stmtGetEntry, err := tx.Preparex(`
 		SELECT e.id, e.account_id, e.affected_account_id,
 			a1.name account, a2.name affected_account,
-			e.type, e.description, e.amount, e.date
+			e.type, e.description, e.category, e.amount, e.date
 		FROM entry e
 		LEFT JOIN account a1 ON e.account_id = a1.id
 		LEFT JOIN account a2 ON e.affected_account_id = a2.id

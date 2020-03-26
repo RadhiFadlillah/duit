@@ -150,7 +150,8 @@ export function EntryList() {
 				// Prepare class name, amount and description
 				let className = "",
 					amount = Big(entry.amount),
-					description = entry.description || ""
+					description = entry.description || "",
+					category = entry.category || ""
 
 				switch (entry.type) {
 					case 1:
@@ -198,7 +199,10 @@ export function EntryList() {
 				contents.push(m(".entry",
 					m("input[type=checkbox].entry__check", checkAttrs),
 					m(".entry__data", { onclick() { toggleSelection(selection, idx) } },
-						m("p.entry__description", { class: descriptionClass }, description),
+						m(".entry__data__column", [
+							m("p.entry__description", { class: descriptionClass }, description),
+							m("p.entry__category", category)
+						]),
 						m("p.entry__amount", { class: className }, formatNumber(amount)),
 					)
 				))

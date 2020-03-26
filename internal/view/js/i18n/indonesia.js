@@ -143,7 +143,8 @@ export default new Map([
 	// Form Entry
 	["Amount", "Jumlah"],
 	["Entry date", "Tanggal entry"],
-	["Description", "Deskripsi"],
+	["Description", "Kategori"],
+	["Category", ""],
 	["Target", "Tujuan"],
 
 	// Form User

@@ -301,6 +301,7 @@ export function HomePage() {
 					id: oldEntry.id,
 					affectedAccountId: data.affectedAccountId,
 					description: data.description,
+					category: data.category,
 					amount: data.amount,
 					date: data.date,
 				})

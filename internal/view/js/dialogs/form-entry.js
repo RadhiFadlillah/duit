@@ -55,6 +55,10 @@ export function DialogFormEntry() {
 			name: "description",
 			label: i18n("Description"),
 			required: true
+		},{
+			name: "category",
+			label: i18n("Category"),
+			required: true
 		})
 
 		if (entryType === 3) formFields.push({
