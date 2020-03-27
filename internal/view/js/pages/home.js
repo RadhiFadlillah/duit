@@ -299,6 +299,7 @@ export function HomePage() {
 				method: "PUT",
 				body: JSON.stringify({
 					id: oldEntry.id,
+					accountId: state.activeAccount.id,
 					affectedAccountId: data.affectedAccountId,
 					description: data.description,
 					category: data.category,

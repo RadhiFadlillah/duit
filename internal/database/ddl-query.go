@@ -22,8 +22,12 @@ CREATE TABLE IF NOT EXISTS account (
 
 const ddlCreateCategory = `
 CREATE TABLE IF NOT EXISTS category (
-	name             VARCHAR(100) NOT NULL,
-	PRIMARY KEY (name))
+	id					INT UNSIGNED  NOT NULL AUTO_INCREMENT,
+	account_id			INT UNSIGNED NOT NULL,
+	name				VARCHAR(80)  NOT NULL,
+	PRIMARY KEY (id),
+	FOREIGN KEY category_account_id_FK (account_id) REFERENCES account (id)
+		ON UPDATE CASCADE ON DELETE CASCADE)
 	CHARACTER SET utf8mb4
 `
 
@@ -36,14 +40,14 @@ CREATE TABLE IF NOT EXISTS entry (
 	description         VARCHAR(150)  DEFAULT NULL,
 	amount              DECIMAL(20,4) NOT NULL,
 	date                DATE          NOT NULL,
-	category            VARCHAR(80)   DEFAULT NULL,
+	category            INT UNSIGNED  DEFAULT NULL,
 	PRIMARY KEY (id),
 	FOREIGN KEY entry_account_id_FK (account_id) REFERENCES account (id)
 		ON UPDATE CASCADE ON DELETE CASCADE,
 	FOREIGN KEY entry_affected_account_id_FK (affected_account_id) REFERENCES account (id)
 		ON UPDATE CASCADE ON DELETE CASCADE,
-	FOREIGN KEY entry_category_FK (category) REFERENCES category(name)
-		ON UPDATE CASCADE ON DELETE RESTRICT,
+	FOREIGN KEY entry_category_FK (category) REFERENCES category(id)
+		ON UPDATE CASCADE ON DELETE SET NULL,
 	CONSTRAINT CHECK (affected_account_id <> account_id),
 	CONSTRAINT CHECK (type >= 1 AND type <= 3))
 	CHARACTER SET utf8mb4

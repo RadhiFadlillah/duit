@@ -39,10 +39,11 @@ func (h *Handler) SelectEntries(w http.ResponseWriter, r *http.Request, ps httpr
 	stmtSelectEntries, err := tx.Preparex(`
 		SELECT e.id, e.account_id, e.affected_account_id,
 			a1.name account, a2.name affected_account,
-			e.type, e.description, e.category, e.amount, e.date
+			e.type, e.description, c.name AS category, e.amount, e.date
 		FROM entry e
 		LEFT JOIN account a1 ON e.account_id = a1.id
 		LEFT JOIN account a2 ON e.affected_account_id = a2.id
+		LEFT JOIN category c ON e.category = c.id
 		WHERE e.account_id = ?
 		OR e.affected_account_id = ?
 		ORDER BY e.date DESC, e.id DESC
@@ -122,22 +123,24 @@ func (h *Handler) InsertEntry(w http.ResponseWriter, r *http.Request, ps httprou
 	stmtGetEntry, err := tx.Preparex(`
 		SELECT e.id, e.account_id, e.affected_account_id,
 			a1.name account, a2.name affected_account,
-			e.type, e.description, e.category, e.amount, e.date
+			e.type, e.description, c.name AS category, e.amount, e.date
 		FROM entry e
 		LEFT JOIN account a1 ON e.account_id = a1.id
 		LEFT JOIN account a2 ON e.affected_account_id = a2.id
+		LEFT JOIN category c ON e.category = c.id
 		WHERE e.id = ?`)
 	checkError(err)
 
 	// Save to database
-	createCategoryIfNotExists(tx, entry.Category)
+	categoryID, err := createCategoryIfNotExists(tx, entry.AccountID, entry.Category)
+	checkError(err)
 
 	res := stmtInsertEntry.MustExec(
 		entry.AccountID,
 		entry.AffectedAccountID,
 		entry.Type,
 		entry.Description,
-		entry.Category,
+		categoryID,
 		entry.Amount,
 		entry.Date)
 	entry.ID, _ = res.LastInsertId()
@@ -187,19 +190,21 @@ func (h *Handler) UpdateEntry(w http.ResponseWriter, r *http.Request, ps httprou
 	stmtGetEntry, err := tx.Preparex(`
 		SELECT e.id, e.account_id, e.affected_account_id,
 			a1.name account, a2.name affected_account,
-			e.type, e.description, e.category, e.amount, e.date
+			e.type, e.description, c.name AS category, e.amount, e.date
 		FROM entry e
 		LEFT JOIN account a1 ON e.account_id = a1.id
 		LEFT JOIN account a2 ON e.affected_account_id = a2.id
+		LEFT JOIN category c ON e.category = c.id
 		WHERE e.id = ?`)
 	checkError(err)
 
 	// Update database
-	createCategoryIfNotExists(tx, entry.Category)
+	categoryID, err := createCategoryIfNotExists(tx, entry.AccountID, entry.Category)
+	checkError(err)
 
 	stmtUpdateEntry.MustExec(
 		entry.AffectedAccountID, entry.Description,
-		entry.Category, entry.Amount, entry.Date, entry.ID)
+		categoryID, entry.Amount, entry.Date, entry.ID)
 
 	// Fetch the updated data
 	err = stmtGetEntry.Get(&entry, entry.ID)
@@ -250,16 +255,32 @@ func (h *Handler) DeleteEntries(w http.ResponseWriter, r *http.Request, ps httpr
 	checkError(err)
 }
 
-func createCategoryIfNotExists(tx *sqlx.Tx, category null.String){
+func createCategoryIfNotExists(tx *sqlx.Tx, accountID int64, category null.String) (int64, error){
 	
-	if(category.IsZero()) { return }
+	if(category.IsZero()) { return 0, nil }
 
-	stmtInsertCategory, err := tx.Preparex(`INSERT INTO category 
-		(name) 
-		VALUES (?) 
-		ON DUPLICATE KEY UPDATE name = ?`)
+	stmtSelectCategory, err := tx.Preparex(`
+			SELECT id 
+			FROM category
+			WHERE account_id = ? AND name = ?`)
 	checkError(err)
 
-	stmtInsertCategory.MustExec(
-		category, category)
+	var categoryID int64
+	err = stmtSelectCategory.Get(&categoryID, accountID, category)
+
+	if err == nil {
+		return categoryID, nil
+	}
+
+	stmtInsertCategory, err := tx.Preparex(`
+		INSERT INTO category (account_id, name) 
+		VALUES (?, ?) `)
+	checkError(err)
+
+	res := stmtInsertCategory.MustExec(accountID, category)
+
+	lastInsertedID, err := res.LastInsertId();
+	checkError(err)
+
+	return lastInsertedID, nil
 }

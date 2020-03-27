@@ -15,7 +15,8 @@ type Config struct {
 
 // Category is container for expense's category
 type Category struct {
-	Name 	string 	`db:"name" json:"name"`
+	AccountID		int64	`db:"account_id" json:"-"`
+	Name			string	`db:"name"       json:"name"`
 }
 
 // User is container for user's data
