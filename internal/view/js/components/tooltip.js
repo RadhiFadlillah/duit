@@ -29,38 +29,53 @@ export function Tooltip() {
 		let position = vnode.attrs.position
 		if (typeof position != "string") position = "right"
 
-		// Set tooltip location
-		let x, y, className,
-			width = vnode.dom.offsetWidth,
-			height = vnode.dom.offsetHeight,
-			parentRect = vnode.dom.parentElement.getBoundingClientRect()
+		// Create function to set tooltip location
+		function setTooltipPosition(tooltip) {
+			let x, y, className,
+				width = tooltip.offsetWidth,
+				height = tooltip.offsetHeight,
+				parentRect = tooltip.parentElement.getBoundingClientRect()
 
-		switch (position) {
-			case "top":
-				x = parentRect.x + (parentRect.width - width) / 2
-				y = parentRect.y - height
-				className = "tooltip--top"
-				break
-			case "right":
-				x = parentRect.x + parentRect.width
-				y = parentRect.y + (parentRect.height - height) / 2
-				className = "tooltip--right"
-				break
-			case "left":
-				x = parentRect.x - width
-				y = parentRect.y + (parentRect.height - height) / 2
-				className = "tooltip--left"
-				break
-			default: // is bottom
-				x = parentRect.x + (parentRect.width - width) / 2
-				y = parentRect.y + parentRect.height
-				className = "tooltip--bottom"
-				break
+			switch (position) {
+				case "top":
+					x = parentRect.x + (parentRect.width - width) / 2
+					y = parentRect.y - height
+					className = "tooltip--top"
+					break
+				case "right":
+					x = parentRect.x + parentRect.width
+					y = parentRect.y + (parentRect.height - height) / 2
+					className = "tooltip--right"
+					break
+				case "left":
+					x = parentRect.x - width
+					y = parentRect.y + (parentRect.height - height) / 2
+					className = "tooltip--left"
+					break
+				default: // is bottom
+					x = parentRect.x + (parentRect.width - width) / 2
+					y = parentRect.y + parentRect.height
+					className = "tooltip--bottom"
+					break
+			}
+
+			tooltip.style.left = `${x}px`
+			tooltip.style.top = `${y}px`
+			tooltip.classList.add(className)
 		}
 
-		vnode.dom.style.left = `${x}px`
-		vnode.dom.style.top = `${y}px`
-		vnode.dom.classList.add(className)
+		// Add event listener to tooltip parent
+		let tooltip = vnode.dom,
+			parent = tooltip.parentElement
+
+		parent.addEventListener("mouseenter", () => {
+			tooltip.classList.add("tooltip--visible")
+			setTooltipPosition(tooltip)
+		})
+
+		parent.addEventListener("mouseleave", () => {
+			tooltip.classList.remove("tooltip--visible")
+		})
 	}
 
 	return {

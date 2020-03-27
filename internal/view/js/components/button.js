@@ -17,8 +17,6 @@ let attrs = {
 import { Tooltip } from "./tooltip.min.js";
 
 export function Button() {
-	let tooltipVisible = false
-
 	function renderView(vnode) {
 		// Parse attributes and set default value
 		let icon = vnode.attrs.icon,
@@ -57,7 +55,7 @@ export function Button() {
 			childNodes.push(m("span.button__text", caption))
 		}
 
-		if (iconOnly && tooltipVisible && caption !== "") {
+		if (iconOnly && caption !== "") {
 			childNodes.push(m(Tooltip, {
 				text: caption,
 				position: tooltipPosition,
@@ -68,16 +66,12 @@ export function Button() {
 			return m("a.button", {
 				class: className,
 				href: href,
-				onmouseenter() { tooltipVisible = true },
-				onmouseleave() { tooltipVisible = false },
 			}, childNodes)
 		}
 
 		return m("button.button", {
 			class: className,
 			onclick: vnode.attrs.onclick,
-			onmouseenter() { tooltipVisible = true },
-			onmouseleave() { tooltipVisible = false },
 		}, childNodes)
 	}
 

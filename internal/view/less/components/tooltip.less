@@ -1,7 +1,7 @@
 // out: ../../css/components/
 
 .tooltip {
-	display         : block;
+	display         : none;
 	position        : fixed;
 	color           : var(--tooltip-color);
 	background-color: var(--tooltip-bg);
@@ -23,6 +23,10 @@
 		position        : absolute;
 		z-index         : -1;
 	}
+}
+
+.tooltip--visible {
+	display: block;
 }
 
 .tooltip--bottom {
