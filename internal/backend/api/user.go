@@ -176,11 +176,59 @@ func (h *Handler) UpdateUser(w http.ResponseWriter, r *http.Request, ps httprout
 		panic(fmt.Errorf("username must not empty"))
 	}
 
-	// Update user in database
-	h.db.MustExec(`UPDATE user 
+	// Start transaction
+	// Make sure to rollback if panic ever happened
+	tx := h.db.MustBegin()
+
+	defer func() {
+		if r := recover(); r != nil {
+			tx.Rollback()
+			panic(r)
+		}
+	}()
+
+	// Prepare statements
+	stmtGet, err := tx.Preparex(`SELECT id, username, name, admin
+		FROM user WHERE id = ?`)
+	checkError(err)
+
+	stmtUpdate, err := tx.Preparex(`UPDATE user 
 		SET username = ?, name = ?, admin = ? 
-		WHERE id = ?`,
-		user.Username, user.Name, user.Admin, user.ID)
+		WHERE id = ?`)
+	checkError(err)
+
+	stmtCountAdmin, err := tx.Preparex(`SELECT COUNT(id) FROM user WHERE admin = 1`)
+	checkError(err)
+
+	// Fetch old user data
+	var oldUser model.User
+	err = stmtGet.Get(&oldUser, user.ID)
+	checkError(err)
+
+	if err == sql.ErrNoRows {
+		panic(fmt.Errorf("user doesn't exist"))
+	}
+
+	// Update user in database
+	stmtUpdate.MustExec(user.Username, user.Name, user.Admin, user.ID)
+
+	// Make sure at least one admin exists
+	var nAdmin int
+	err = stmtCountAdmin.Get(&nAdmin)
+	checkError(err)
+
+	if nAdmin == 0 {
+		panic(fmt.Errorf("at least one admin must exists"))
+	}
+
+	// Commit transaction
+	err = tx.Commit()
+	checkError(err)
+
+	// If username or admin status changed, do mass logout
+	if oldUser.Username != user.Username || oldUser.Admin != user.Admin {
+		h.auth.MassLogout(oldUser.Username)
+	}
 
 	// Return updated user
 	w.Header().Add("Content-Encoding", "gzip")
