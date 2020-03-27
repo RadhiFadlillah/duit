@@ -13,6 +13,7 @@ import {
 import {
 	request,
 	cloneObject,
+	getActiveUser
 } from "../libs/utils.min.js"
 
 import {
@@ -22,6 +23,7 @@ import {
 export function UserPage() {
 	let state = {
 		loading: false,
+		activeUser: null,
 
 		users: [],
 		selectedUsers: [],
@@ -33,7 +35,8 @@ export function UserPage() {
 		dlgEdit: { visible: false, loading: false },
 		dlgDelete: { visible: false, loading: false },
 		dlgReset: { visible: false, loading: false },
-		dlgResetResult: { message: "", visible: false },
+		dlgResetResult: { userId: 0, message: "", visible: false },
+		dlgLogin: { title: "", message: "", visible: false }
 	}
 
 	// Local method
@@ -123,6 +126,16 @@ export function UserPage() {
 
 		request("/api/user", timeoutDuration, options)
 			.then(json => {
+				// If the updated user is the currently active user, log out
+				if (state.activeUser != null && state.activeUser.id === user.id) {
+					if (state.activeUser.username !== data.username || state.activeUser.admin !== data.admin) {
+						state.dlgLogin.title = i18n("Edit User")
+						state.dlgLogin.message = i18n("Data for active user has been updated, please login again")
+						state.dlgLogin.visible = true
+						return
+					}
+				}
+
 				state.users.splice(idx, 1, json)
 				state.users.sort(sortUsers)
 			})
@@ -154,6 +167,15 @@ export function UserPage() {
 
 		request("/api/users", timeoutDuration, options)
 			.then(() => {
+				// If the deleted user is the currently active user, log out
+				if (state.activeUser != null && ids.indexOf(state.activeUser.id) !== -1) {
+					state.dlgLogin.title = i18n("Delete User")
+					state.dlgLogin.message = i18n("Current active user has been deleted, please login again")
+					state.dlgLogin.visible = true
+					return
+				}
+
+				// Else, just remove all deleted users from list
 				state.selectedUsers
 					.sort((a, b) => b - a)
 					.forEach(idx => { state.users.splice(idx, 1) })
@@ -185,6 +207,7 @@ export function UserPage() {
 
 		request("/api/user/password/reset", timeoutDuration, options)
 			.then(json => {
+				state.dlgResetResult.userId = user.id
 				state.dlgResetResult.message = i18n("New password: $password").replace("$password", json.password)
 				state.dlgResetResult.visible = true
 			})
@@ -280,7 +303,25 @@ export function UserPage() {
 				title: i18n("Reset Password"),
 				btnText: i18n("OK"),
 				message: state.dlgResetResult.message,
-				onAccepted() { state.dlgResetResult.visible = false }
+				onAccepted() {
+					state.dlgResetResult.visible = false
+
+					// If the reset request is for active user, log out
+					if (state.activeUser != null && state.activeUser.id === state.dlgResetResult.userId) {
+						state.dlgLogin.title = i18n("Reset Password")
+						state.dlgLogin.message = i18n("Password for active user has been reset, please login again")
+						state.dlgLogin.visible = true
+					}
+				}
+			}))
+		}
+
+		if (dialogs.length === 0 && state.dlgLogin.visible) {
+			dialogs.push(m(DialogAlert, {
+				title: state.dlgLogin.title,
+				message: state.dlgLogin.message,
+				btnText: i18n("OK"),
+				onAccepted() { window.location.href = "/login" },
 			}))
 		}
 
@@ -315,8 +356,13 @@ export function UserPage() {
 		loadUsers()
 	}
 
+	function onInit() {
+		state.activeUser = getActiveUser()
+	}
+
 	return {
 		view: renderView,
-		oncreate: onViewCreated
+		oncreate: onViewCreated,
+		oninit: onInit,
 	}
 }

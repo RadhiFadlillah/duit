@@ -85,6 +85,9 @@ export default new Map([
 	// User page -- dialog content
 	["Permanently delete $n users ?"],
 	["Reset password for $name ?"],
+	["Data for active user has been updated, please login again"],
+	["Current active user has been deleted, please login again"],
+	["Password for active user has been reset, please login again"],
 	// User page -- API message
 	["User saved with password $password"],
 	["New password: $password"],
