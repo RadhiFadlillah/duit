@@ -255,10 +255,10 @@ func (h *Handler) DeleteEntries(w http.ResponseWriter, r *http.Request, ps httpr
 	checkError(err)
 }
 
-func createCategoryIfNotExists(tx *sqlx.Tx, accountID int64, category null.String) (int64, error) {
+func createCategoryIfNotExists(tx *sqlx.Tx, accountID int64, category null.String) (null.Int, error) {
 
-	if category.IsZero() {
-		return 0, nil
+	if len(category.ValueOrZero()) == 0 {
+		return null.Int{}, nil
 	}
 
 	stmtSelectCategory, err := tx.Preparex(`
@@ -271,7 +271,7 @@ func createCategoryIfNotExists(tx *sqlx.Tx, accountID int64, category null.Strin
 	err = stmtSelectCategory.Get(&categoryID, accountID, category)
 
 	if err == nil {
-		return categoryID, nil
+		return null.IntFrom(categoryID), nil
 	}
 
 	stmtInsertCategory, err := tx.Preparex(`
@@ -284,5 +284,5 @@ func createCategoryIfNotExists(tx *sqlx.Tx, accountID int64, category null.Strin
 	lastInsertedID, err := res.LastInsertId()
 	checkError(err)
 
-	return lastInsertedID, nil
+	return null.IntFrom(lastInsertedID), nil
 }

@@ -58,7 +58,7 @@ export function DialogFormEntry() {
 		},{
 			name: "category",
 			label: i18n("Category"),
-			required: true
+			required: false
 		})
 
 		if (entryType === 3) formFields.push({
