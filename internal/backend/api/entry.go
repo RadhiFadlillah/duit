@@ -4,11 +4,11 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
-	"net/http"
-	"github.com/jmoiron/sqlx"
-	"gopkg.in/guregu/null.v3"
 	"github.com/RadhiFadlillah/duit/internal/model"
+	"github.com/jmoiron/sqlx"
 	"github.com/julienschmidt/httprouter"
+	"gopkg.in/guregu/null.v3"
+	"net/http"
 )
 
 // SelectEntries is handler for GET /api/entries
@@ -255,9 +255,11 @@ func (h *Handler) DeleteEntries(w http.ResponseWriter, r *http.Request, ps httpr
 	checkError(err)
 }
 
-func createCategoryIfNotExists(tx *sqlx.Tx, accountID int64, category null.String) (int64, error){
-	
-	if(category.IsZero()) { return 0, nil }
+func createCategoryIfNotExists(tx *sqlx.Tx, accountID int64, category null.String) (int64, error) {
+
+	if category.IsZero() {
+		return 0, nil
+	}
 
 	stmtSelectCategory, err := tx.Preparex(`
 			SELECT id 
@@ -279,7 +281,7 @@ func createCategoryIfNotExists(tx *sqlx.Tx, accountID int64, category null.Strin
 
 	res := stmtInsertCategory.MustExec(accountID, category)
 
-	lastInsertedID, err := res.LastInsertId();
+	lastInsertedID, err := res.LastInsertId()
 	checkError(err)
 
 	return lastInsertedID, nil
