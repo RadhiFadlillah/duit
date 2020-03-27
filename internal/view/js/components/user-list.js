@@ -141,10 +141,15 @@ export function UserList() {
 				}
 			}
 
+			let userNames = [user.name]
+			if (user.admin) userNames.push(
+				m("span.user--admin", m("i.fas.fa-fw.fa-cog"))
+			)
+
 			return m(".user",
 				m("input[type=checkbox].user__check", checkAttrs),
 				m(".user__data", { onclick() { toggleSelection(selection, idx) } },
-					m("p.user__name", user.name),
+					m("p.user__name", ...userNames),
 					m("p.user__username", user.username),
 				)
 			)

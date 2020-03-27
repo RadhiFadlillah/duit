@@ -116,7 +116,8 @@ export function UserPage() {
 				body: JSON.stringify({
 					id: user.id,
 					name: data.name,
-					username: data.username
+					username: data.username,
+					admin: data.admin,
 				})
 			}
 
