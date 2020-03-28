@@ -56,6 +56,8 @@ func ServeApp(db *sqlx.DB, port int) error {
 	router.PUT("/api/account", apiHdl.UpdateAccount)
 	router.DELETE("/api/accounts", apiHdl.DeleteAccounts)
 
+	router.GET("/api/categories", apiHdl.SelectCategories)
+
 	router.GET("/api/entries", apiHdl.SelectEntries)
 	router.POST("/api/entry", apiHdl.InsertEntry)
 	router.PUT("/api/entry", apiHdl.UpdateEntry)

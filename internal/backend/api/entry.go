@@ -132,8 +132,11 @@ func (h *Handler) InsertEntry(w http.ResponseWriter, r *http.Request, ps httprou
 	checkError(err)
 
 	// Save to database
-	categoryID, err := createCategoryIfNotExists(tx, entry.AccountID, entry.Category)
-	checkError(err)
+	categoryID := createCategoryIfNotExists(tx, model.Category{
+		Name:      entry.Category.ValueOrZero(),
+		AccountID: entry.AccountID,
+		Type:      entry.Type,
+	})
 
 	res := stmtInsertEntry.MustExec(
 		entry.AccountID,
@@ -199,8 +202,11 @@ func (h *Handler) UpdateEntry(w http.ResponseWriter, r *http.Request, ps httprou
 	checkError(err)
 
 	// Update database
-	categoryID, err := createCategoryIfNotExists(tx, entry.AccountID, entry.Category)
-	checkError(err)
+	categoryID := createCategoryIfNotExists(tx, model.Category{
+		Name:      entry.Category.ValueOrZero(),
+		AccountID: entry.AccountID,
+		Type:      entry.Type,
+	})
 
 	stmtUpdateEntry.MustExec(
 		entry.AffectedAccountID, entry.Description,
@@ -255,34 +261,36 @@ func (h *Handler) DeleteEntries(w http.ResponseWriter, r *http.Request, ps httpr
 	checkError(err)
 }
 
-func createCategoryIfNotExists(tx *sqlx.Tx, accountID int64, category null.String) (null.Int, error) {
+func createCategoryIfNotExists(tx *sqlx.Tx, category model.Category) null.Int {
 
-	if len(category.ValueOrZero()) == 0 {
-		return null.Int{}, nil
+	if len(category.Name) == 0 {
+		return null.Int{}
+	}
+	if !model.IsCategoryTypeValid(category.Type) {
+		return null.Int{}
 	}
 
 	stmtSelectCategory, err := tx.Preparex(`
 			SELECT id 
 			FROM category
-			WHERE account_id = ? AND name = ?`)
+			WHERE account_id = ? AND name = ? AND type = ?`)
 	checkError(err)
 
 	var categoryID int64
-	err = stmtSelectCategory.Get(&categoryID, accountID, category)
-
-	if err == nil {
-		return null.IntFrom(categoryID), nil
+	if err = stmtSelectCategory.Get(&categoryID, category.AccountID, category.Name, category.Type); err == nil {
+		return null.IntFrom(categoryID)
 	}
-
-	stmtInsertCategory, err := tx.Preparex(`
-		INSERT INTO category (account_id, name) 
-		VALUES (?, ?) `)
 	checkError(err)
 
-	res := stmtInsertCategory.MustExec(accountID, category)
+	stmtInsertCategory, err := tx.Preparex(`
+		INSERT INTO category (account_id, name, type) 
+		VALUES (?, ?, ?) `)
+	checkError(err)
+
+	res := stmtInsertCategory.MustExec(category.AccountID, category.Name, category.Type)
 
 	lastInsertedID, err := res.LastInsertId()
 	checkError(err)
 
-	return null.IntFrom(lastInsertedID), nil
+	return null.IntFrom(lastInsertedID)
 }

@@ -77,6 +77,7 @@ export function DialogForm() {
 				case "date":
 				case "boolean":
 				case "select":
+				case "inputDatalist":
 				case "textarea": break
 				default: return
 			}
@@ -172,6 +173,21 @@ export function DialogForm() {
 						maxlength: maxlength,
 						oninput(e) { formData[name] = e.target.value }
 					})
+					break
+				case "inputDatalist":
+					inputNode = m("div",[
+						m('input.dialog__form__input', { 
+							type: 'text', 
+							list: name,
+							oninput(e) { formData[name] = e.target.value }
+						}),
+						m('datalist',{id: name}, choices.map(choice => {
+							return m('option.dialog__form__select__option', {
+								value: choice.value,
+								selected: choice.value === formData[name],
+							})
+						}))
+					])
 					break
 				case "boolean":
 					let checkFieldAttrs = {

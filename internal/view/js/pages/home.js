@@ -42,6 +42,9 @@ export function HomePage() {
 			maxPage: 1,
 		},
 
+		categories: [],
+		categoriesLoading: false,
+
 		dlgError: { message: "", visible: false },
 		dlgNewAccount: { visible: false, loading: false },
 		dlgEditAccount: { visible: false, loading: false },
@@ -82,6 +85,10 @@ export function HomePage() {
 		return intDateB - intDateA
 	}
 
+	function sortCategories(a, b) {
+		return a.name > b.name ? 1 : -1
+	}
+2
 	function filterActiveAccount(account) {
 		if (state.activeAccount == null) return true
 		return account.id !== state.activeAccount.id
@@ -211,6 +218,33 @@ export function HomePage() {
 			})
 	}
 
+	function loadCategories() {
+		if (state.activeAccount == null) return
+
+		state.loading = true
+		state.categoriesLoading = true
+		m.redraw()
+
+		let url = new URL("/api/categories", document.baseURI)
+		url.searchParams.set("account", state.activeAccount.id)
+
+		request(url.toString(), timeoutDuration)
+			.then(json => {
+				state.categories = json
+			})
+			.catch(err => {
+				state.dlgError.message = err.message
+				state.dlgError.visible = true
+			})
+			.finally(() => {
+				state.loading = false
+				state.categoriesLoading = false
+				m.redraw()
+
+				loadEntries()
+			})
+	}
+
 	function loadEntries() {
 		if (state.activeAccount == null) return
 
@@ -275,6 +309,11 @@ export function HomePage() {
 					account.total = Big(account.total).minus(amount).toString()
 					state.accounts[affectedIdx] = account
 				}
+
+				// Update Categories
+				state.categories.push({name: entry.category, type: entry.type});
+				state.categories = [...new Set(state.categories)]
+				state.categories.sort(sortCategories)
 			})
 			.catch(err => {
 				state.dlgError.message = err.message
@@ -303,6 +342,7 @@ export function HomePage() {
 					affectedAccountId: data.affectedAccountId,
 					description: data.description,
 					category: data.category,
+					type: oldEntry.type,
 					amount: data.amount,
 					date: data.date,
 				})
@@ -329,6 +369,11 @@ export function HomePage() {
 				account.total = Big(account.total).minus(oldAmount).plus(amount).toString()
 				state.accounts[accountIdx] = account
 				state.activeAccount = account
+
+				// Update Categories
+				state.categories.push({name: entry.category, type: entry.type});
+				state.categories = [...new Set(state.categories)]
+				state.categories.sort(sortCategories)
 
 				// Update sum for affected account
 				if (entry.type !== 3) return
@@ -502,10 +547,15 @@ export function HomePage() {
 				case 3: title = i18n("New Transfer"); break
 			}
 
+			let filteredCategories = state.categories.filter(category => {
+				return category.type === state.dlgNewEntry.type
+			})
+
 			dialogs.push(m(DialogFormEntry, {
 				title: title,
 				loading: state.dlgNewEntry.loading,
 				accounts: state.accounts.filter(filterActiveAccount),
+				categories: filteredCategories,
 				entryType: state.dlgNewEntry.type,
 				onAccepted(data) { saveNewEntry(data) },
 				onRejected() { state.dlgNewEntry.visible = false }
@@ -524,10 +574,15 @@ export function HomePage() {
 				case 3: title = i18n("Edit Transfer"); break
 			}
 
+			let filteredCategories = state.categories.filter(category => {
+				return category.type === entry.type
+			})
+
 			dialogs.push(m(DialogFormEntry, {
 				title: title,
 				loading: state.dlgEditEntry.loading,
 				accounts: state.accounts.filter(filterActiveAccount),
+				categories: filteredCategories,
 				entryType: entry.type,
 				defaultValue: defaultValue,
 				onAccepted(data) { updateEntry(data) },
@@ -574,7 +629,8 @@ export function HomePage() {
 					state.activeAccount = account
 					state.pagination.maxPage = 1
 					state.pagination.page = 1
-					loadEntries(account)
+
+					loadCategories(account)
 				}
 			},
 		}))
@@ -582,7 +638,7 @@ export function HomePage() {
 		if (state.activeAccount != null) {
 			homeContents.push(m(EntryList, {
 				class: "home-page__entry-list",
-				loading: state.entriesLoading,
+				loading: state.categoriesLoading || state.entriesLoading,
 				account: state.activeAccount,
 				entries: state.entries,
 				selection: state.selectedEntries,
