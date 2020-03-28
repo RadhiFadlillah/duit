@@ -85,10 +85,18 @@ export function HomePage() {
 		return intDateB - intDateA
 	}
 
-	function sortCategories(a, b) {
-		return a.name > b.name ? 1 : -1
+	function pushCategory(category){
+		let updatedCategories = [...state.categories];
+		updatedCategories.push(category)
+
+		let uniqueCategories = updatedCategories.filter((elem, index, self) => self.findIndex(
+			(t) => {return (t.name === elem.name && t.type === elem.type)}) === index);
+
+		uniqueCategories.sort((a,b) => a.name > b.name ? 1 : -1)
+
+		return uniqueCategories;
 	}
-2
+
 	function filterActiveAccount(account) {
 		if (state.activeAccount == null) return true
 		return account.id !== state.activeAccount.id
@@ -311,9 +319,7 @@ export function HomePage() {
 				}
 
 				// Update Categories
-				state.categories.push({name: entry.category, type: entry.type});
-				state.categories = [...new Set(state.categories)]
-				state.categories.sort(sortCategories)
+				state.categories = pushCategory({name: entry.category, type: entry.type})
 			})
 			.catch(err => {
 				state.dlgError.message = err.message
@@ -371,9 +377,7 @@ export function HomePage() {
 				state.activeAccount = account
 
 				// Update Categories
-				state.categories.push({name: entry.category, type: entry.type});
-				state.categories = [...new Set(state.categories)]
-				state.categories.sort(sortCategories)
+				state.categories = pushCategory({name: entry.category, type: entry.type})
 
 				// Update sum for affected account
 				if (entry.type !== 3) return
