@@ -179,12 +179,12 @@ export function DialogForm() {
 						m('input.dialog__form__input', { 
 							type: 'text', 
 							list: name,
+							value: formData[name],
 							oninput(e) { formData[name] = e.target.value }
 						}),
 						m('datalist',{id: name}, choices.map(choice => {
 							return m('option.dialog__form__select__option', {
-								value: choice.value,
-								selected: choice.value === formData[name],
+								value: choice.value
 							})
 						}))
 					])
