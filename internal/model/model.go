@@ -5,12 +5,31 @@ import (
 	"gopkg.in/guregu/null.v3"
 )
 
+type Type int
+const (
+    Income Type = iota + 1
+    Expense 
+	Transfer
+)
+
 // Config is content of configuration file
 type Config struct {
 	DbUser     string
 	DbPassword string
 	DbHost     string
 	DbName     string
+}
+
+// Category is container for expense's category
+type Category struct {
+	AccountID int64  `db:"account_id" json:"-"`
+	Name      string `db:"name"       json:"name"`
+	Type      int    `db:"type"       json:"type"`
+}
+
+// Returns true if the category type iota is valid
+func IsCategoryTypeValid(categoryType int) bool{
+	return categoryType == 1 || categoryType == 2
 }
 
 // User is container for user's data
@@ -39,6 +58,7 @@ type Entry struct {
 	AffectedAccountID null.Int        `db:"affected_account_id" json:"affectedAccountId"`
 	Type              int             `db:"type"                json:"type"`
 	Description       null.String     `db:"description"         json:"description"`
+	Category          null.String     `db:"category"            json:"category"`
 	Amount            decimal.Decimal `db:"amount"              json:"amount"`
 	Date              string          `db:"date"                json:"date"`
 

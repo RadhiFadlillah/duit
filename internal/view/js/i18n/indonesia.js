@@ -150,6 +150,7 @@ export default new Map([
 	["Amount", "Jumlah"],
 	["Entry date", "Tanggal entry"],
 	["Description", "Deskripsi"],
+	["Category", "Kategori"],
 	["Target", "Tujuan"],
 
 	// Form Password

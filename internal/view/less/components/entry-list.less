@@ -110,6 +110,7 @@
 .entry__data {
 	display     : flex;
 	flex-flow   : row nowrap;
+	justify-content: space-between;
 	flex        : 1 0;
 	margin-left : 0.5rem;
 	padding     : 0.5rem;
@@ -118,6 +119,18 @@
 
 .entry__description {
 	font-size : 0.9rem;
+	word-break: break-word;
+	flex      : 1 0;
+}
+
+.entry__data__column{
+	display   : flex;
+	flex-direction: column;
+	flex: 1 0;
+}
+
+.entry__category {
+	font-size : 0.6rem;
 	word-break: break-word;
 	flex      : 1 0;
 }

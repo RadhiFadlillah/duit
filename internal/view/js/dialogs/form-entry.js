@@ -20,6 +20,7 @@ export function DialogFormEntry() {
 		let title = vnode.attrs.title,
 			loading = vnode.attrs.loading,
 			accounts = vnode.attrs.accounts,
+			categories = vnode.attrs.categories,
 			entryType = vnode.attrs.entryType,
 			defaultValue = vnode.attrs.defaultValue,
 			onAccepted = vnode.attrs.onAccepted,
@@ -28,6 +29,7 @@ export function DialogFormEntry() {
 		if (typeof title != "string") title = ""
 		if (typeof loading != "boolean") loading = false
 		if (!Array.isArray(accounts)) accounts = []
+		if (!Array.isArray(categories)) categories = []
 		if (typeof entryType != "number") entryType = 1
 		if (typeof defaultValue != "object") defaultValue = {}
 		if (typeof onAccepted != "function") onAccepted = () => { }
@@ -55,6 +57,14 @@ export function DialogFormEntry() {
 			name: "description",
 			label: i18n("Description"),
 			required: true
+		},{
+			name: "category",
+			label: i18n("Category"),
+			type: "inputDatalist",
+			choices: categories.map(category => {
+				return  { value: category.name }
+			}),
+			required: false
 		})
 
 		if (entryType === 3) formFields.push({
